@@ -1,0 +1,233 @@
+﻿<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Foodelivery</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/surawat_67_172467_L003.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <!-- Google Fonts: Madimi One -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Madimi+One&display=swap" rel="stylesheet">
+
+    <style>
+            .madimi-one-regular {
+                font-family: "Madimi One", sans-serif;
+                font-weight: 400;
+                font-style: normal;
+            }
+
+            .bg-orange {
+                background-color: #ff6600 !important;
+            }
+
+            .navbar-nav .nav-item {
+                padding-right: 12px;
+            }
+
+            .navbar-nav .nav-link {
+                border-radius: 50px;
+                padding: 6px 14px !important;
+                transition: background-color 0.2s ease;
+            }
+
+            .navbar-nav .nav-link:hover {
+                background-color: rgba(255, 255, 255, 0.18);
+            }
+
+            /* ไฮไลต์เมนูหน้าที่กำลังเปิดอยู่ */
+            .navbar-nav .nav-link.active-menu {
+                background-color: rgba(0, 0, 0, 0.22);
+                font-weight: bold;
+            }
+
+            /* ปรับแต่ง Sidebar ตะกร้า */
+            .cart-offcanvas {
+                width: 320px !important;
+                background-color: #ffffff;
+                color: #000000;
+                font-family: "Madimi One", sans-serif;
+            }
+
+            .cart-title {
+                font-size: 26px;
+                font-weight: bold;
+            }
+
+            .cart-item-name {
+                font-size: 15px;
+                color: #111;
+                max-width: 140px;
+            }
+
+            .cart-item-price {
+                font-size: 15px;
+                font-weight: bold;
+                color: #111;
+            }
+
+            .btn-qty {
+                background: none;
+                border: none;
+                padding: 0;
+                color: #222;
+                font-size: 18px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                transition: 0.15s;
+            }
+
+            .btn-qty:hover {
+                color: #ff6600;
+                transform: scale(1.15);
+            }
+
+            .qty-number {
+                font-size: 15px;
+                font-weight: bold;
+                min-width: 20px;
+                text-align: center;
+            }
+
+            .btn-checkout {
+                background-color: #7e7e7e;
+                color: #000000;
+                font-weight: bold;
+                font-size: 15px;
+                border-radius: 50px;
+                border: none;
+                padding: 10px 40px;
+                transition: 0.2s;
+                text-decoration: none;
+            }
+
+            .btn-checkout:hover {
+                background-color: #5c5c5c;
+                color: #ffffff;
+            }
+    </style>
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+
+@{
+    var currentController = ViewContext.RouteData.Values["Controller"]?.ToString();
+    var currentAction = ViewContext.RouteData.Values["Action"]?.ToString();
+}
+
+<body class="min-vh-100 d-flex flex-column m-0 p-0">
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-orange border-bottom box-shadow mb-0 py-2">
+            <div class="container-fluid px-4">
+
+                <!-- โลโก้ร้าน -> ไปหน้า Menu -->
+                <a class="navbar-brand fw-bold d-flex align-items-center madimi-one-regular" asp-area=""
+                   asp-controller="Menu" asp-action="Menu">
+                    <i class="bi bi-shop me-2"></i>
+                    <span class="px-2 py-1 rounded">Foodelivery</span>
+                </a>
+
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
+                        aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarContent">
+                    <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center gap-1">
+                        <!-- 1. หน้าหลัก (Menu) -->
+                        <li class="nav-item">
+                            <a class="nav-link text-white @(currentController == "Menu" ? "active-menu" : "")"
+                               asp-area="" asp-controller="Menu" asp-action="Menu">หน้าหลัก</a>
+                        </li>
+
+                        <!-- 2. ตะกร้า (Offcanvas Sidebar) -->
+                        <li class="nav-item">
+                            <a class="nav-link text-white position-relative d-inline-flex align-items-center"
+                               href="javascript:void(0);" data-bs-toggle="offcanvas" data-bs-target="#cartSidebar"
+                               style="cursor: pointer;">
+                                <i class="bi bi-cart-fill me-1"></i> ตะกร้า
+                                <span id="cartBadge"
+                                      class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-light"
+                                      style="display: none; font-size: 11px;">
+                                    0
+                                </span>
+                            </a>
+                        </li>
+
+                        <!-- 3. จองโต๊ะ (Booking/Index) -->
+                        <li class="nav-item">
+                            <a class="nav-link text-white @(currentController == "Booking" ? "active-menu" : "")"
+                               asp-area="" asp-controller="Booking" asp-action="Index">จองโต๊ะ</a>
+                        </li>
+
+                        <!-- 4. รายการอาหารที่สั่ง (Order/CurrentOrder) -->
+                        <li class="nav-item">
+                            <a class="nav-link text-white @(currentController == "Order" && currentAction == "CurrentOrder" ? "active-menu" : "")"
+                               asp-area="" asp-controller="Order" asp-action="CurrentOrder">รายการอาหารที่สั่ง</a>
+                        </li>
+
+                        <!-- 5. ประวัติ (Order/History) -->
+                        <li class="nav-item">
+                            <a class="nav-link text-white @(currentController == "Order" && (currentAction == "History" || currentAction == "Review") ? "active-menu" : "")"
+                               asp-area="" asp-controller="Order" asp-action="History">ประวัติ</a>
+                        </li>
+
+                        <!-- 6. โปรไฟล์ (Home/EditProfile) -->
+                        <li class="nav-item">
+                            <a class="nav-link text-white d-flex align-items-center" asp-controller="Account"
+                               asp-action="EditProfile">
+                                <i class="bi bi-person-circle fs-5 me-1"></i> <span>โปรไฟล์</span>
+                            </a>
+                        </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main role="main" class="flex-grow-1 w-100 pb-5">
+        @RenderBody()
+    </main>
+
+    <!-- Sidebar Offcanvas ตะกร้าสินค้า -->
+    <div class="offcanvas offcanvas-end cart-offcanvas shadow-lg" tabindex="-1" id="cartSidebar"
+         aria-labelledby="cartSidebarLabel">
+        <div class="offcanvas-header justify-content-between pb-0 pt-4 px-4">
+            <div class="w-100 text-center">
+                <h4 class="cart-title mb-0" id="cartSidebarLabel">ตะกร้า</h4>
+            </div>
+            <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+
+        <div class="offcanvas-body d-flex flex-column justify-content-between px-4 py-4">
+            <div id="cartItemsContainer" class="d-flex flex-column gap-3 overflow-auto pe-1">
+                <!-- รายการอาหารจะถูกวาดที่นี่ผ่าน JavaScript -->
+            </div>
+
+            <div class="text-center pt-4">
+                <a asp-controller="Order" asp-action="Checkout" class="btn btn-checkout px-5">CheckOut</a>
+            </div>
+        </div>
+    </div>
+
+    <footer class="border-top footer text-white bg-orange py-3 w-100 mt-5 position-static">
+        <div class="container text-center">
+            © 2569 - surawat_67_172467_L003 - <a class="text-white text-decoration-underline" asp-area=""
+                                                 asp-controller="Home" asp-action="Privacy">Privacy</a>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+
+</html>

@@ -1,0 +1,463 @@
+@model IEnumerable<surawat_67_172467_L003.Models.Bill>
+@{
+    ViewData["Title"] = "รายการบิลและกระแสเงินเข้า (Finance)";
+    Layout = "AdminLayout";
+    string currentPeriod = ViewBag.Period ?? "today";
+    string selectedDate = ViewBag.SelectedDate ?? DateTime.Now.ToString("yyyy-MM-dd");
+}
+
+<style>
+    .madimi-one-regular {
+        font-family: "Madimi One", sans-serif;
+    }
+
+    body {
+        background-color: #fffaf5;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140' viewBox='0 0 140 140'%3E%3Cg fill='none' stroke='%23ff6600' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round' opacity='0.11'%3E%3Cpath d='M18 36h32c0 11-7 18-16 18s-16-7-16-18z'/%3E%3Cpath d='M22 30l24-6M22 25l24-3'/%3E%3Cpath d='M96 22l18 28-28 6z'/%3E%3Ccircle cx='98' cy='38' r='2'/%3E%3Ccircle cx='104' cy='44' r='1.5'/%3E%3Cpath d='M30 88h16l-2 24H32z'/%3E%3Cpath d='M28 88h20M38 88l5-10'/%3E%3Cpath d='M92 84v28M89 84v9c0 3 6 3 6 0v-9M106 84v28'/%3E%3Cellipse cx='106' cy='89' rx='3.5' ry='5'/%3E%3Ccircle cx='68' cy='24' r='2'/%3E%3Ccircle cx='66' cy='70' r='2.5'/%3E%3C/g%3E%3C/svg%3E");
+        background-repeat: repeat;
+        color: #222222;
+    }
+
+    .kpi-card {
+        background-color: #ffffff;
+        color: #222222;
+        border: 1px solid #ffe4d1;
+        border-left: 6px solid #ff6600;
+        border-radius: 20px;
+        padding: 20px 24px;
+        box-shadow: 0 8px 22px rgba(255, 102, 0, 0.08);
+    }
+
+    .kpi-icon-circle {
+        width: 52px;
+        height: 52px;
+        border-radius: 16px;
+        background-color: #fff0e3;
+        color: #ff6600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+    }
+
+    .filter-pill {
+        background-color: #ffffff;
+        color: #555555;
+        border: 1.5px solid #ffd5b8;
+        border-radius: 50px;
+        padding: 7px 18px;
+        font-size: 14px;
+        font-weight: bold;
+        text-decoration: none;
+        transition: 0.2s;
+    }
+
+    .filter-pill:hover, .filter-pill.active {
+        background-color: #ff6600;
+        border-color: #ff6600;
+        color: #ffffff;
+        box-shadow: 0 4px 10px rgba(255, 102, 0, 0.25);
+    }
+
+    .search-input {
+        background-color: #ffffff;
+        border: 1.5px solid #ffd5b8;
+        color: #222222;
+    }
+
+    .search-input:focus {
+        background-color: #ffffff;
+        border-color: #ff6600;
+        box-shadow: 0 0 0 0.2rem rgba(255, 102, 0, 0.15);
+    }
+
+    .btn-export {
+        background-color: #198754;
+        color: #ffffff;
+        font-weight: bold;
+        border-radius: 50px;
+        padding: 8px 20px;
+        border: none;
+        font-size: 14px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: 0.2s;
+    }
+
+    .btn-export:hover {
+        background-color: #146c43;
+        color: #ffffff;
+    }
+
+    .table-wrapper {
+        background-color: #ffffff;
+        border: 1px solid #ffe4d1;
+        border-radius: 20px;
+        box-shadow: 0 10px 28px rgba(255, 102, 0, 0.08);
+        overflow: hidden;
+    }
+
+    .custom-table thead th {
+        background-color: #ff6600;
+        color: #ffffff;
+        border: none;
+        padding: 14px 16px;
+        font-weight: bold;
+    }
+
+    .custom-table tbody tr:nth-of-type(odd) {
+        background-color: #ffffff;
+    }
+
+    .custom-table tbody tr:nth-of-type(even) {
+        background-color: #fff8f2;
+    }
+
+    .custom-table tbody tr:hover {
+        background-color: #ffefe3;
+    }
+
+    .custom-table td {
+        padding: 13px 16px;
+        border-bottom: 1px solid #ffefe3;
+        color: #222222;
+    }
+
+    .btn-inspect {
+        background-color: #fff0e3;
+        color: #ff6600;
+        border: 1px solid #ffd5b8;
+        border-radius: 50px;
+        padding: 5px 14px;
+        font-size: 13px;
+        font-weight: bold;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        transition: 0.2s;
+    }
+
+    .btn-inspect:hover {
+        background-color: #ff6600;
+        color: #ffffff;
+    }
+
+    .bill-modal .modal-content {
+        background-color: #fffaf5;
+        border: 1px solid #ffe4d1;
+        border-top: 6px solid #ff6600;
+        border-radius: 24px;
+        padding: 28px 34px;
+        box-shadow: 0 14px 36px rgba(0, 0, 0, 0.2);
+        color: #222222;
+    }
+</style>
+
+<div class="d-flex justify-content-center align-items-center py-4 madimi-one-regular">
+    <div class="container" style="max-width: 1120px;">
+
+        <div class="mb-4">
+            <h3 class="fw-bold mb-0 text-dark">
+                <i class="bi bi-receipt-cutoff me-2" style="color: #ff6600;"></i>รายการบิลและกระแสเงินเข้า
+            </h3>
+            <small class="text-muted">ตรวจสอบยอดรับชำระเงินและรายละเอียดใบเสร็จย้อนหลัง</small>
+        </div>
+
+        <!-- 1. การ์ดสรุปกระแสเงินเข้า -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <div class="kpi-card d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small fw-bold">กระแสเงินเข้ารวม (ชำระแล้ว)</div>
+                        <div class="fs-3 fw-bold text-success">@(((decimal)ViewBag.TotalInflow).ToString("N2")) บาท</div>
+                        <div class="text-muted" style="font-size: 12px;">จากทั้งหมด @ViewBag.TotalBillCount บิล</div>
+                    </div>
+                    <div class="kpi-icon-circle text-success" style="background-color: #e8f5e9;">
+                        <i class="bi bi-cash-coin"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="kpi-card d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small fw-bold">ยอดโอนผ่านพร้อมเพย์</div>
+                        <div class="fs-3 fw-bold" style="color: #ff6600;">@(((decimal)ViewBag.PromptPayTotal).ToString("N2")) บาท</div>
+                        <div class="text-muted" style="font-size: 12px;">เงินเข้าบัญชีธนาคาร</div>
+                    </div>
+                    <div class="kpi-icon-circle">
+                        <i class="bi bi-qr-code-scan"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="kpi-card d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small fw-bold">เงินสด / ชำระปลายทาง</div>
+                        <div class="fs-3 fw-bold text-primary">@(((decimal)ViewBag.OtherPayTotal).ToString("N2")) บาท</div>
+                        <div class="text-muted" style="font-size: 12px;">ยอดรับเงินสดหน้าร้านและพนักงานส่ง</div>
+                    </div>
+                    <div class="kpi-icon-circle text-primary" style="background-color: #e7f1ff;">
+                        <i class="bi bi-wallet2"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. ตัวกรองช่วงเวลา + ช่องค้นหา + ปุ่มส่งออกรายงาน -->
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+            <div class="d-flex align-items-center flex-wrap gap-2">
+                <a asp-controller="Admin" asp-action="Billlist" asp-route-period="today"
+                   class="filter-pill @(currentPeriod == "today" ? "active" : "")">
+                    วันนี้
+                </a>
+                <a asp-controller="Admin" asp-action="Billlist" asp-route-period="7days"
+                   class="filter-pill @(currentPeriod == "7days" ? "active" : "")">
+                    7 วันล่าสุด
+                </a>
+                <a asp-controller="Admin" asp-action="Billlist" asp-route-period="month"
+                   class="filter-pill @(currentPeriod == "month" ? "active" : "")">
+                    เดือนนี้
+                </a>
+                <a asp-controller="Admin" asp-action="Billlist" asp-route-period="all"
+                   class="filter-pill @(currentPeriod == "all" ? "active" : "")">
+                    ทั้งหมด
+                </a>
+
+                <form asp-controller="Admin" asp-action="Billlist" method="get" class="d-inline-flex align-items-center ms-1">
+                    <input type="date" name="date" value="@selectedDate"
+                           class="form-control rounded-pill search-input py-1 px-3"
+                           style="font-size: 14px;"
+                           onchange="this.form.submit()" />
+                </form>
+            </div>
+
+            <div class="d-flex align-items-center gap-2 flex-grow-1 justify-content-end" style="max-width: 500px;">
+                <div class="position-relative w-100">
+                    <input type="text"
+                           id="liveSearchBill"
+                           class="form-control rounded-pill search-input px-4 py-2 pe-5"
+                           placeholder="ค้นหารหัสบิล, รหัสคำสั่งซื้อ, เลขอ้างอิง, ชื่อผู้โอน..."
+                           autocomplete="off" />
+                    <span class="position-absolute end-0 top-50 translate-middle-y me-3 pe-none" style="color: #ff6600;">
+                        <i class="bi bi-search fs-5"></i>
+                    </span>
+                </div>
+
+                <button type="button" class="btn-export flex-shrink-0" onclick="exportBillsToCSV()">
+                    <i class="bi bi-file-earmark-excel-fill"></i> ส่งออกไฟล์
+                </button>
+            </div>
+        </div>
+
+        <!-- 3. ตารางรายการบิล -->
+        <div class="table-responsive table-wrapper">
+            <table class="table custom-table align-middle m-0" id="billsTable">
+                <thead>
+                    <tr>
+                        <th style="width: 9%; text-align: center;">รหัสบิล</th>
+                        <th style="width: 17%; text-align: center;">เลขอ้างอิง</th>
+                        <th style="width: 14%; text-align: center;">รหัสคำสั่งซื้อ</th>
+                        <th style="width: 14%; text-align: center;">วันที่ / เวลา</th>
+                        <th style="width: 16%;">ชื่อผู้โอน</th>
+                        <th style="width: 12%; text-align: center;">ช่องทาง</th>
+                        <th style="width: 10%; text-align: end;">จำนวนเงิน</th>
+                        <th style="width: 8%; text-align: center;">ใบเสร็จ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        @foreach (var item in Model)
+                        {
+                            var orderCode = item.Order?.OrderNumber ?? item.OrderId.ToString();
+                            var dateText = item.PaidAt?.ToString("dd/MM/yyyy HH:mm") ?? "-";
+                            var payMethodText = item.PaymentMethod == "PROMPTPAY" ? "PromptPay" : item.PaymentMethod;
+
+                            <tr class="bill-row"
+                                data-search="@($"{item.Id} {item.ReferenceNumber} {item.OrderId} {orderCode} {item.PayerName} {payMethodText}".ToLower())">
+                                <td class="text-center fw-bold">@item.Id</td>
+                                <td class="text-center font-monospace" style="font-size: 13px;">@item.ReferenceNumber</td>
+                                <td class="text-center">
+                                    <span class="badge rounded-pill px-3" style="background-color: #ff6600;">@orderCode</span>
+                                </td>
+                                <td class="text-center" style="font-size: 13px;">@dateText</td>
+                                <td class="fw-bold">@item.PayerName</td>
+                                <td class="text-center">
+                                    @if (item.PaymentMethod.Contains("PROMPTPAY"))
+                                    {
+                                        <span class="badge rounded-pill px-3" style="background-color: #fff0e3; color: #ff6600; border: 1px solid #ffd5b8;">PromptPay</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning text-dark rounded-pill px-3">@payMethodText</span>
+                                    }
+                                </td>
+                                <td class="text-end fw-bold text-success">@item.Amount.ToString("N2") บาท</td>
+                                <td class="text-center">
+                                    <button type="button" class="btn-inspect btn-inspect-bill" data-id="@item.Id" title="ดูรายละเอียดบิล">
+                                        <i class="bi bi-receipt"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    }
+
+                    <tr id="noBillRow" style="@(Model != null && Model.Any() ? "display: none;" : "")">
+                        <td colspan="8" class="text-center text-muted py-4">
+                            ไม่พบรายการบิลในช่วงเวลาที่เลือก
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- ===================================================================== -->
+<!-- หน้าต่างตรวจสอบรายละเอียดใบเสร็จ -->
+<!-- ===================================================================== -->
+<div class="modal fade bill-modal madimi-one-regular" id="inspectBillModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 560px;">
+        <div class="modal-content position-relative">
+            <button type="button" class="btn-close position-absolute top-0 end-0 m-3" data-bs-dismiss="modal"></button>
+
+            <div class="text-center mb-3">
+                <i class="bi bi-receipt-cutoff fs-1" style="color: #ff6600;"></i>
+                <h4 class="fw-bold mb-0">ใบเสร็จรับเงิน / หลักฐานการชำระ</h4>
+                <small class="text-muted" id="mBillRef">เลขอ้างอิง: -</small>
+            </div>
+
+            <div class="bg-white rounded-4 p-3 mb-3 border" style="border-color: #ffe4d1 !important; font-size: 14px;">
+                <div class="d-flex justify-content-between mb-1">
+                    <span class="text-muted">รหัสบิล:</span>
+                    <span class="fw-bold" id="mBillId">-</span>
+                </div>
+                <div class="d-flex justify-content-between mb-1">
+                    <span class="text-muted">เลขออเดอร์:</span>
+                    <span class="fw-bold" id="mOrderNum">-</span>
+                </div>
+                <div class="d-flex justify-content-between mb-1">
+                    <span class="text-muted">ชื่อผู้โอน / ลูกค้า:</span>
+                    <span class="fw-bold" id="mPayerName">-</span>
+                </div>
+                <div class="d-flex justify-content-between mb-1">
+                    <span class="text-muted">ช่องทางชำระเงิน:</span>
+                    <span class="fw-bold" style="color: #ff6600;" id="mPayMethod">-</span>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <span class="text-muted">วัน-เวลาที่ชำระ:</span>
+                    <span class="fw-bold" id="mPaidAt">-</span>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-4 p-3 mb-3 border" style="border-color: #ffe4d1 !important;">
+                <div class="fw-bold mb-2 small" style="color: #ff6600;">รายการอาหารที่ชำระ</div>
+                <div id="mBillItems" class="d-flex flex-column gap-1" style="font-size: 14px;"></div>
+
+                <hr class="my-2" style="border-color: #ffd5b8;" />
+                <div class="d-flex justify-content-between small text-muted">
+                    <span>ยอดรวมอาหาร:</span>
+                    <span id="mSubtotal">0.00 บาท</span>
+                </div>
+                <div class="d-flex justify-content-between small text-danger">
+                    <span>ส่วนลดโปรโมชั่น:</span>
+                    <span id="mDiscount">-0.00 บาท</span>
+                </div>
+                <div class="d-flex justify-content-between fw-bold fs-5 mt-1 pt-1 border-top" style="color: #ff6600;">
+                    <span>ยอดเงินเข้าสุทธิ:</span>
+                    <span id="mTotalAmount">0.00 บาท</span>
+                </div>
+            </div>
+
+            <div class="text-end">
+                <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">ปิดหน้าต่าง</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const searchInput = document.getElementById('liveSearchBill');
+        const rows = document.querySelectorAll('.bill-row');
+        const noRow = document.getElementById('noBillRow');
+
+        searchInput.addEventListener('input', function () {
+            const keyword = this.value.trim().toLowerCase();
+            let visibleCount = 0;
+
+            rows.forEach(row => {
+                const text = row.getAttribute('data-search') || '';
+                if (text.includes(keyword)) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            if (noRow) {
+                noRow.style.display = visibleCount === 0 ? '' : 'none';
+            }
+        });
+
+        const billModal = new bootstrap.Modal(document.getElementById('inspectBillModal'));
+        document.querySelectorAll('.btn-inspect-bill').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const id = this.getAttribute('data-id');
+                fetch(`/Admin/GetBillDetailsJson?id=${id}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        document.getElementById('mBillId').innerText = `#${data.billId}`;
+                        document.getElementById('mBillRef').innerText = `เลขอ้างอิง: ${data.referenceNumber}`;
+                        document.getElementById('mOrderNum').innerText = `${data.orderNumber} (ID: ${data.orderId})`;
+                        document.getElementById('mPayerName').innerText = data.payerName;
+                        document.getElementById('mPayMethod').innerText = data.paymentMethod;
+                        document.getElementById('mPaidAt').innerText = data.paidAt;
+
+                        document.getElementById('mSubtotal').innerText = `${Number(data.subtotal).toLocaleString('en-US', { minimumFractionDigits: 2 })} บาท`;
+                        document.getElementById('mDiscount').innerText = `-${Number(data.discountAmount).toLocaleString('en-US', { minimumFractionDigits: 2 })} บาท`;
+                        document.getElementById('mTotalAmount').innerText = `${Number(data.amount).toLocaleString('en-US', { minimumFractionDigits: 2 })} บาท`;
+
+                        const itemsContainer = document.getElementById('mBillItems');
+                        itemsContainer.innerHTML = '';
+                        if (data.items && data.items.length > 0) {
+                            data.items.forEach(i => {
+                                itemsContainer.innerHTML += `
+                                    <div class="d-flex justify-content-between">
+                                        <span>${i.foodName} x${i.quantity}</span>
+                                        <span class="fw-bold">${Number(i.subtotal).toLocaleString('en-US', { minimumFractionDigits: 2 })} บาท</span>
+                                    </div>`;
+                            });
+                        } else {
+                            itemsContainer.innerHTML = '<div class="text-muted small">ไม่มีข้อมูลรายการย่อย</div>';
+                        }
+
+                        billModal.show();
+                    });
+            });
+        });
+    });
+
+    function exportBillsToCSV() {
+        const rows = document.querySelectorAll('#billsTable tr');
+        let csv = [];
+        rows.forEach(row => {
+            if (row.style.display === 'none' || row.id === 'noBillRow') return;
+            const cols = row.querySelectorAll('th, td');
+            let rowData = [];
+            for (let i = 0; i < cols.length - 1; i++) {
+                let text = cols[i].innerText.replace(/(\r\n|\n|\r)/gm, ' ').trim();
+                rowData.push(`"${text}"`);
+            }
+            csv.push(rowData.join(','));
+        });
+
+        const blob = new Blob(["\uFEFF" + csv.join('\n')], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `finance_bills_${new Date().toISOString().slice(0, 10)}.csv`;
+        link.click();
+    }
+</script>

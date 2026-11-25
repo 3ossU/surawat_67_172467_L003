@@ -1,0 +1,199 @@
+@model surawat_67_172467_L003.Models.User
+@{
+    ViewData["Title"] = "แก้ไขข้อมูลส่วนตัว";
+    Layout = "_Layout";
+}
+
+<style>
+    .madimi-one-regular {
+        font-family: "Madimi One", sans-serif;
+    }
+
+    body {
+        background-color: #fffaf5;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140' viewBox='0 0 140 140'%3E%3Cg fill='none' stroke='%23ff6600' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round' opacity='0.11'%3E%3Cpath d='M18 36h32c0 11-7 18-16 18s-16-7-16-18z'/%3E%3Cpath d='M22 30l24-6M22 25l24-3'/%3E%3Cpath d='M96 22l18 28-28 6z'/%3E%3Ccircle cx='98' cy='38' r='2'/%3E%3Ccircle cx='104' cy='44' r='1.5'/%3E%3Cpath d='M30 88h16l-2 24H32z'/%3E%3Cpath d='M28 88h20M38 88l5-10'/%3E%3Cpath d='M92 84v28M89 84v9c0 3 6 3 6 0v-9M106 84v28'/%3E%3Cellipse cx='106' cy='89' rx='3.5' ry='5'/%3E%3Ccircle cx='68' cy='24' r='2'/%3E%3Ccircle cx='66' cy='70' r='2.5'/%3E%3C/g%3E%3C/svg%3E");
+        background-repeat: repeat;
+        color: #222222;
+    }
+
+    .edit-profile-card {
+        background-color: #ffffff;
+        border: 1px solid #ffe4d1;
+        border-top: 6px solid #ff6600;
+        border-radius: 28px;
+        box-shadow: 0 12px 32px rgba(255, 102, 0, 0.1);
+        max-width: 600px;
+        width: 100%;
+        padding: 40px 46px 32px 46px;
+    }
+
+    .profile-input {
+        background-color: #fff8f2;
+        border: 1.5px solid #ffd5b8;
+        color: #222222;
+        transition: 0.2s;
+    }
+
+    .profile-input:focus {
+        background-color: #ffffff;
+        border-color: #ff6600;
+        color: #222222;
+        box-shadow: 0 0 0 0.2rem rgba(255, 102, 0, 0.15);
+    }
+
+    .btn-save-custom {
+        background: linear-gradient(135deg, #ff6600, #e64a00);
+        color: #ffffff;
+        border: none;
+        box-shadow: 0 6px 16px rgba(255, 102, 0, 0.3);
+        transition: all 0.2s ease;
+    }
+
+    .btn-save-custom:hover {
+        background: linear-gradient(135deg, #e65c00, #cc3d00);
+        color: #ffffff;
+        transform: translateY(-2px);
+    }
+
+    .form-check-input:checked {
+        background-color: #ff6600;
+        border-color: #ff6600;
+    }
+
+    /* โซนออกจากระบบที่แยกออกมาด้านล่างสุด */
+    .logout-zone {
+        margin-top: 38px;
+        padding-top: 22px;
+        border-top: 1.5px dashed #ffd5b8;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .btn-logout-safe {
+        background-color: #fff5f5;
+        color: #dc3545;
+        border: 1.5px solid #f5c2c7;
+        border-radius: 50px;
+        padding: 7px 20px;
+        font-size: 14px;
+        font-weight: bold;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: 0.2s;
+    }
+
+    .btn-logout-safe:hover {
+        background-color: #dc3545;
+        border-color: #dc3545;
+        color: #ffffff;
+    }
+</style>
+
+<div class="d-flex justify-content-center align-items-center py-5 px-3 madimi-one-regular">
+    <div class="edit-profile-card">
+        <div class="text-center fs-2 fw-bold mb-1 text-dark">
+            <i class="bi bi-person-gear me-2" style="color: #ff6600;"></i>แก้ไขข้อมูลส่วนตัว
+        </div>
+        <p class="text-center text-muted small mb-4">อัปเดตข้อมูลผู้ใช้งานหรือเปลี่ยนรหัสผ่านของคุณ</p>
+
+        @if (ViewBag.Status != null)
+        {
+            <div class="alert alert-info text-center py-2 rounded-pill mb-4" style="font-size: 14px;">
+                <i class="bi bi-info-circle-fill me-1"></i> @ViewBag.Status
+            </div>
+        }
+
+        <form asp-controller="Account" asp-action="EditProfile" method="post">
+            <input type="hidden" asp-for="Id" />
+
+            <!-- ตัวเลือกเพศ -->
+            <div class="mb-3 p-3 rounded-4" style="background-color: #fffaf5; border: 1px solid #ffe4d1;">
+                <label class="form-label fw-bold mb-2 d-block" style="font-size: 14px; color: #ff6600;">
+                    <i class="bi bi-gender-ambiguous me-1"></i> เพศ
+                </label>
+                <div class="d-flex gap-4">
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" asp-for="Gender" id="genderMale" value="Male">
+                        <label class="form-check-label ms-1 fw-bold" for="genderMale" style="font-size: 15px;">ชาย</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" asp-for="Gender" id="genderFemale" value="Female">
+                        <label class="form-check-label ms-1 fw-bold" for="genderFemale" style="font-size: 15px;">หญิง</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" asp-for="Gender" id="genderOther" value="Other">
+                        <label class="form-check-label ms-1 fw-bold" for="genderOther" style="font-size: 15px;">อื่นๆ</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ชื่อ และ นามสกุล -->
+            <div class="row g-3 mb-3">
+                <div class="col-6">
+                    <label class="form-label fw-bold mb-1" style="font-size: 14px;">ชื่อ</label>
+                    <input type="text" asp-for="FirstName" class="form-control rounded-pill profile-input px-3 py-2" required />
+                </div>
+                <div class="col-6">
+                    <label class="form-label fw-bold mb-1" style="font-size: 14px;">นามสกุล</label>
+                    <input type="text" asp-for="LastName" class="form-control rounded-pill profile-input px-3 py-2" required />
+                </div>
+            </div>
+
+            <!-- เบอร์โทรศัพท์ และ วันเกิด -->
+            <div class="row g-3 mb-3">
+                <div class="col-6">
+                    <label class="form-label fw-bold mb-1" style="font-size: 14px;">เบอร์โทร</label>
+                    <input type="tel"
+                           asp-for="PhoneNumber"
+                           class="form-control rounded-pill profile-input px-3 py-2"
+                           placeholder="0xxxxxxxxx"
+                           maxlength="10"
+                           pattern="[0-9]{10}"
+                           inputmode="numeric"
+                           oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);"
+                           required />
+                </div>
+                <div class="col-6">
+                    <label class="form-label fw-bold mb-1" style="font-size: 14px;">วันเกิด</label>
+                    <input type="date" asp-for="Birthdate" class="form-control rounded-pill profile-input px-3 py-2" />
+                </div>
+            </div>
+
+            <!-- รหัสผ่านใหม่ และ ยืนยันรหัสผ่านใหม่ -->
+            <div class="row g-3 mb-4">
+                <div class="col-6">
+                    <label class="form-label fw-bold mb-1" style="font-size: 13px;">รหัสผ่านใหม่</label>
+                    <input type="password" name="NewPassword" class="form-control rounded-pill profile-input px-3 py-2" placeholder="เว้นว่างถ้าไม่เปลี่ยน" />
+                </div>
+                <div class="col-6">
+                    <label class="form-label fw-bold mb-1" style="font-size: 13px;">ยืนยันรหัสผ่านใหม่</label>
+                    <input type="password" name="ConfirmPassword" class="form-control rounded-pill profile-input px-3 py-2" placeholder="ยืนยันรหัสผ่านใหม่" />
+                </div>
+            </div>
+
+            <!-- ปุ่มบันทึกข้อมูลอยู่ตรงกลางฟอร์มแยกอิสระ -->
+            <div class="text-center mt-4">
+                <button type="submit" class="btn btn-save-custom rounded-pill fw-bold px-5 py-2" style="min-width: 230px;">
+                    <i class="bi bi-check-circle-fill me-2"></i>บันทึกข้อมูล
+                </button>
+            </div>
+        </form>
+
+        <!-- โซนจัดการบัญชี: แยกปุ่มออกจากระบบไว้ด้านล่างสุดใต้เส้นคั่น -->
+        <div class="logout-zone">
+            <div class="text-muted" style="font-size: 13px;">
+                <i class="bi bi-shield-check me-1" style="color: #ff6600;"></i> ต้องการออกจากระบบในอุปกรณ์นี้หรือไม่
+            </div>
+            <a asp-controller="Account" asp-action="Logout"
+               onclick="return confirm('ยืนยันที่จะออกจากระบบหรือไม่?');"
+               class="btn-logout-safe">
+                <i class="bi bi-box-arrow-right"></i> ออกจากระบบ
+            </a>
+        </div>
+    </div>
+</div>

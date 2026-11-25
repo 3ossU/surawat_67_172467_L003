@@ -1,0 +1,356 @@
+@model IEnumerable<surawat_67_172467_L003.Models.TableBooking>
+@{
+    ViewData["Title"] = "จัดการคิวจองโต๊ะ";
+    Layout = "AdminLayout";
+    string currentFilter = ViewBag.Filter ?? "today";
+    string selectedDate = ViewBag.SelectedDate ?? DateTime.Now.ToString("yyyy-MM-dd");
+}
+
+<style>
+    .madimi-one-regular {
+        font-family: "Madimi One", sans-serif;
+    }
+
+    body {
+        background-color: #fffaf5;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140' viewBox='0 0 140 140'%3E%3Cg fill='none' stroke='%23ff6600' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round' opacity='0.11'%3E%3Cpath d='M18 36h32c0 11-7 18-16 18s-16-7-16-18z'/%3E%3Cpath d='M22 30l24-6M22 25l24-3'/%3E%3Cpath d='M96 22l18 28-28 6z'/%3E%3Ccircle cx='98' cy='38' r='2'/%3E%3Ccircle cx='104' cy='44' r='1.5'/%3E%3Cpath d='M30 88h16l-2 24H32z'/%3E%3Cpath d='M28 88h20M38 88l5-10'/%3E%3Cpath d='M92 84v28M89 84v9c0 3 6 3 6 0v-9M106 84v28'/%3E%3Cellipse cx='106' cy='89' rx='3.5' ry='5'/%3E%3Ccircle cx='68' cy='24' r='2'/%3E%3Ccircle cx='66' cy='70' r='2.5'/%3E%3C/g%3E%3C/svg%3E");
+        background-repeat: repeat;
+        color: #222222;
+    }
+
+    .kpi-card {
+        background-color: #ffffff;
+        color: #222222;
+        border: 1px solid #ffe4d1;
+        border-left: 6px solid #ff6600;
+        border-radius: 20px;
+        padding: 20px 24px;
+        box-shadow: 0 8px 22px rgba(255, 102, 0, 0.08);
+    }
+
+    .kpi-icon-circle {
+        width: 52px;
+        height: 52px;
+        border-radius: 16px;
+        background-color: #fff0e3;
+        color: #ff6600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+    }
+
+    .filter-pill {
+        background-color: #ffffff;
+        color: #555555;
+        border: 1.5px solid #ffd5b8;
+        border-radius: 50px;
+        padding: 7px 18px;
+        font-size: 14px;
+        font-weight: bold;
+        text-decoration: none;
+        transition: 0.2s;
+    }
+
+    .filter-pill:hover, .filter-pill.active {
+        background-color: #ff6600;
+        border-color: #ff6600;
+        color: #ffffff;
+        box-shadow: 0 4px 10px rgba(255, 102, 0, 0.25);
+    }
+
+    .search-input {
+        background-color: #ffffff;
+        border: 1.5px solid #ffd5b8;
+        color: #222222;
+    }
+
+    .search-input:focus {
+        background-color: #ffffff;
+        border-color: #ff6600;
+        box-shadow: 0 0 0 0.2rem rgba(255, 102, 0, 0.15);
+    }
+
+    .table-wrapper {
+        background-color: #ffffff;
+        border: 1px solid #ffe4d1;
+        border-radius: 20px;
+        box-shadow: 0 10px 28px rgba(255, 102, 0, 0.08);
+        overflow: hidden;
+    }
+
+    .custom-table thead th {
+        background-color: #ff6600;
+        color: #ffffff;
+        border: none;
+        padding: 14px 16px;
+        font-weight: bold;
+    }
+
+    .custom-table tbody tr:nth-of-type(odd) {
+        background-color: #ffffff;
+    }
+
+    .custom-table tbody tr:nth-of-type(even) {
+        background-color: #fff8f2;
+    }
+
+    .custom-table tbody tr:hover {
+        background-color: #ffefe3;
+    }
+
+    .custom-table td {
+        padding: 13px 16px;
+        border-bottom: 1px solid #ffefe3;
+        color: #222222;
+    }
+
+    .btn-checkin {
+        background-color: #198754;
+        color: #ffffff;
+        border: none;
+        border-radius: 50px;
+        padding: 6px 14px;
+        font-size: 13px;
+        font-weight: bold;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        transition: 0.2s;
+    }
+
+    .btn-checkin:hover {
+        background-color: #146c43;
+        color: #ffffff;
+    }
+
+    .btn-cancel-q {
+        background-color: #fff0e3;
+        color: #dc3545;
+        border: 1px solid #ffd5b8;
+        border-radius: 50px;
+        padding: 6px 12px;
+        font-size: 13px;
+        transition: 0.2s;
+    }
+
+    .btn-cancel-q:hover {
+        background-color: #dc3545;
+        color: #ffffff;
+    }
+</style>
+
+<div class="d-flex justify-content-center align-items-center py-4 madimi-one-regular">
+    <div class="container" style="max-width: 1100px;">
+
+        <div class="mb-4">
+            <h3 class="fw-bold mb-0 text-dark">
+                <i class="bi bi-calendar2-check-fill me-2" style="color: #ff6600;"></i>จัดการคิวจองโต๊ะ
+            </h3>
+            <small class="text-muted">ตรวจสอบโต๊ะที่ลูกค้าจองล่วงหน้าและยืนยันการเข้าใช้บริการ</small>
+        </div>
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success rounded-4 text-center py-2 mb-4">
+                <i class="bi bi-check-circle-fill me-1"></i> @TempData["Success"]
+            </div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger rounded-4 text-center py-2 mb-4">
+                <i class="bi bi-exclamation-triangle-fill me-1"></i> @TempData["Error"]
+            </div>
+        }
+
+        <!-- 1. การ์ดสรุปคิวจองโต๊ะวันนี้ -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <div class="kpi-card d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small fw-bold">คิวจองโต๊ะวันนี้ทั้งหมด</div>
+                        <div class="fs-3 fw-bold text-dark">@ViewBag.TodayTotal คิว</div>
+                    </div>
+                    <div class="kpi-icon-circle">
+                        <i class="bi bi-calendar2-week"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="kpi-card d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small fw-bold">รอรับลูกค้า (ยังไม่มา)</div>
+                        <div class="fs-3 fw-bold" style="color: #ff6600;">@ViewBag.TodayWaiting คิว</div>
+                    </div>
+                    <div class="kpi-icon-circle">
+                        <i class="bi bi-hourglass-split"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="kpi-card d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small fw-bold">ลูกค้ามาถึงร้านแล้ว</div>
+                        <div class="fs-3 fw-bold text-success">@ViewBag.TodayArrived คิว</div>
+                    </div>
+                    <div class="kpi-icon-circle text-success" style="background-color: #e8f5e9;">
+                        <i class="bi bi-person-check-fill"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. แถบตัวกรองช่วงวัน + เลือกวันที่ + ช่องค้นหา -->
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+            <div class="d-flex align-items-center flex-wrap gap-2">
+                <a asp-controller="Admin" asp-action="Bookinglist" asp-route-filter="today"
+                   class="filter-pill @(currentFilter == "today" ? "active" : "")">
+                    วันนี้
+                </a>
+                <a asp-controller="Admin" asp-action="Bookinglist" asp-route-filter="upcoming"
+                   class="filter-pill @(currentFilter == "upcoming" ? "active" : "")">
+                    วันนี้และล่วงหน้า
+                </a>
+                <a asp-controller="Admin" asp-action="Bookinglist" asp-route-filter="all"
+                   class="filter-pill @(currentFilter == "all" ? "active" : "")">
+                    ทั้งหมด
+                </a>
+
+                <form asp-controller="Admin" asp-action="Bookinglist" method="get" class="d-inline-flex align-items-center ms-1">
+                    <input type="date" name="date" value="@selectedDate"
+                           class="form-control rounded-pill search-input py-1 px-3"
+                           style="font-size: 14px;"
+                           onchange="this.form.submit()" />
+                </form>
+            </div>
+
+            <div class="position-relative" style="min-width: 280px; max-width: 360px; flex-grow: 1;">
+                <input type="text"
+                       id="liveSearchBooking"
+                       class="form-control rounded-pill search-input px-4 py-2 pe-5"
+                       placeholder="ค้นหาชื่อผู้จอง, เบอร์โทร, โต๊ะ..."
+                       autocomplete="off" />
+                <span class="position-absolute end-0 top-50 translate-middle-y me-3 pe-none" style="color: #ff6600;">
+                    <i class="bi bi-search fs-5"></i>
+                </span>
+            </div>
+        </div>
+
+        <!-- 3. ตารางคิวจองโต๊ะ -->
+        <div class="table-responsive table-wrapper">
+            <table class="table custom-table align-middle m-0">
+                <thead>
+                    <tr>
+                        <th style="width: 9%; text-align: center;">รหัสจอง</th>
+                        <th style="width: 13%; text-align: center;">โต๊ะที่จอง</th>
+                        <th style="width: 10%; text-align: center;">จำนวนคน</th>
+                        <th style="width: 12%; text-align: center;">วันที่</th>
+                        <th style="width: 10%; text-align: center;">เวลา</th>
+                        <th style="width: 15%;">ชื่อผู้จอง</th>
+                        <th style="width: 12%; text-align: center;">เบอร์โทร</th>
+                        <th style="width: 19%; text-align: center;">สถานะ / จัดการ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        @foreach (var b in Model)
+                        {
+                            var tableLabel = b.Table != null ? $"โต๊ะ {b.Table.TableNumber}" : $"#{b.TableId}";
+                            var statusText = b.Status switch
+                            {
+                                "CONFIRMED" => "รอรับลูกค้า",
+                                "COMPLETED" => "ลูกค้ามาแล้ว",
+                                "CANCELLED" => "ยกเลิกแล้ว",
+                                _ => b.Status
+                            };
+
+                            <tr class="booking-row"
+                                data-search="@($"{b.Id} {tableLabel} {b.CustomerName} {b.PhoneNumber} {statusText}".ToLower())">
+                                <td class="text-center fw-bold">@b.Id</td>
+                                <td class="text-center">
+                                    <span class="badge rounded-pill px-3 py-1" style="background-color: #ff6600;">@tableLabel</span>
+                                </td>
+                                <td class="text-center fw-bold">@b.TotalMember ท่าน</td>
+                                <td class="text-center">@b.BookingDate.ToString("dd/MM/yyyy")</td>
+                                <td class="text-center fw-bold" style="color: #ff6600;">@b.BookingTime.ToString("HH:mm") น.</td>
+                                <td class="fw-bold">@b.CustomerName</td>
+                                <td class="text-center">
+                                    <a href="tel:@b.PhoneNumber" class="text-decoration-none text-dark">
+                                        <i class="bi bi-telephone-fill text-success me-1"></i>@b.PhoneNumber
+                                    </a>
+                                </td>
+                                <td class="text-center">
+                                    @if (b.Status == "CONFIRMED")
+                                    {
+                                        <div class="d-inline-flex gap-1">
+                                            <form asp-controller="Admin" asp-action="UpdateBookingStatus" method="post" class="m-0">
+                                                <input type="hidden" name="id" value="@b.Id" />
+                                                <input type="hidden" name="status" value="COMPLETED" />
+                                                <button type="submit" class="btn-checkin">
+                                                    <i class="bi bi-check-circle-fill"></i> ยืนยันลูกค้ามา
+                                                </button>
+                                            </form>
+
+                                            <form asp-controller="Admin" asp-action="UpdateBookingStatus" method="post" class="m-0"
+                                                  onsubmit="return confirm('ยืนยันที่จะยกเลิกคิวจองของคุณ @b.CustomerName หรือไม่?');">
+                                                <input type="hidden" name="id" value="@b.Id" />
+                                                <input type="hidden" name="status" value="CANCELLED" />
+                                                <button type="submit" class="btn-cancel-q" title="ยกเลิกการจอง">
+                                                    <i class="bi bi-x-lg"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    }
+                                    else if (b.Status == "COMPLETED")
+                                    {
+                                        <span class="badge bg-success rounded-pill px-3 py-2">
+                                            <i class="bi bi-person-check-fill me-1"></i> ลูกค้ามาแล้ว
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary rounded-pill px-3 py-2">ยกเลิกแล้ว</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+
+                    <tr id="noBookingRow" style="@(Model != null && Model.Any() ? "display: none;" : "")">
+                        <td colspan="8" class="text-center text-muted py-4">
+                            ไม่พบรายการจองโต๊ะในช่วงเวลาที่เลือก
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const searchInput = document.getElementById('liveSearchBooking');
+        const rows = document.querySelectorAll('.booking-row');
+        const noRow = document.getElementById('noBookingRow');
+
+        searchInput.addEventListener('input', function () {
+            const keyword = this.value.trim().toLowerCase();
+            let visibleCount = 0;
+
+            rows.forEach(row => {
+                const text = row.getAttribute('data-search') || '';
+                if (text.includes(keyword)) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            if (noRow) {
+                noRow.style.display = visibleCount === 0 ? '' : 'none';
+            }
+        });
+    });
+</script>

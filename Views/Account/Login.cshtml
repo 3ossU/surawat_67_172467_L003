@@ -1,0 +1,121 @@
+@model surawat_67_172467_L003.ViewModels.LoginViewModel
+@{
+    ViewData["Title"] = "Login";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Madimi+One&display=swap" rel="stylesheet">
+
+    <style>
+        .madimi-one-regular {
+            font-family: "Madimi One", sans-serif;
+            font-weight: 400;
+            font-style: normal;
+        }
+
+        body {
+            background-color: #585858;
+            background-image: linear-gradient(rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.35)),
+                              url('https://files.vogue.co.th/uploads/Hatyai-Chicken_.webp');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        .text-shadow-custom {
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.45);
+        }
+
+        .btn-login-custom {
+            background-color: #ff6600;
+            color: #ffffff;
+            border: none;
+            transition: 0.2s;
+        }
+
+        .btn-login-custom:hover {
+            background-color: #e05500;
+            color: #ffffff;
+        }
+
+        .btn-signup-custom {
+            border: 1.5px solid rgba(255, 255, 255, 0.75);
+            background-color: rgba(0, 0, 0, 0.25);
+            transition: 0.2s;
+        }
+
+        .btn-signup-custom:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+        }
+    </style>
+</head>
+
+<body class="d-flex justify-content-center align-items-center vh-100 madimi-one-regular">
+
+    <div class="w-100 text-center text-white p-3 text-shadow-custom" style="max-width: 360px;">
+
+        <div class="fs-2 mb-1">WELCOME TO</div>
+        <div class="fs-4 mb-4">restaurant name</div>
+
+        <!-- แสดงข้อความเมื่อสมัครสมาชิกสำเร็จ -->
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success py-2 mb-3 text-center" style="font-size: 14px; border-radius: 20px; text-shadow: none;">
+                @TempData["Success"]
+            </div>
+        }
+
+        <!-- แสดงข้อความเตือนเมื่อเบอร์โทรหรือรหัสผ่านไม่ถูกต้อง -->
+        @if (ViewBag.Status != null)
+        {
+            <div class="alert alert-danger py-2 mb-3 text-center" style="font-size: 14px; border-radius: 20px; text-shadow: none;">
+                @ViewBag.Status
+            </div>
+        }
+
+        <!-- ฟอร์มเข้าสู่ระบบ -->
+        <form asp-controller="Account" asp-action="Login" method="post">
+            <div class="text-start mb-3">
+                <label class="form-label mb-1" style="font-size: 14px;">เบอร์โทร</label>
+                <input asp-for="Phone" type="tel" class="form-control rounded-pill bg-light border-0 px-3 py-2"
+                       placeholder="09xxxxxxx" maxlength="10" pattern="[0-9]{10}" inputmode="numeric"
+                       oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);" required />
+
+                <label class="form-label mb-1 mt-2" style="font-size: 14px;">รหัสผ่าน</label>
+                <input asp-for="Password" type="password" class="form-control rounded-pill bg-light border-0 px-3 py-2"
+                       required />
+            </div>
+
+            <button type="submit"
+                    class="btn btn-login-custom w-100 rounded-pill fw-bold mt-2 py-2">ลงชื่อเข้าใช้</button>
+        </form>
+
+        <div class="my-4" style="font-size: 14px;">หรือ</div>
+
+        <div class="mb-2" style="font-size: 12px;">ไม่มีบัญชีผู้ใช้</div>
+        <!-- ปุ่มสมัครบัญชี -->
+        <a asp-controller="Account" asp-action="Register"
+           class="btn btn-signup-custom w-100 rounded-pill text-white py-2">สมัครบัญชี</a>
+
+        <!-- ลิงก์ลืมรหัสผ่าน -->
+        <a asp-controller="Account" asp-action="ForgotPassword" class="d-block mt-4 text-white text-decoration-none"
+           style="font-size: 12px;">ลืมรหัสผ่าน?</a>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

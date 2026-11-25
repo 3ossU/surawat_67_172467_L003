@@ -1,0 +1,339 @@
+@{
+    ViewData["Title"] = "Admin Dashboard";
+    Layout = "~/Views/Shared/adminLayout.cshtml";
+    string currentPeriod = ViewBag.Period ?? "all";
+}
+
+<style>
+    .madimi-one-regular {
+        font-family: "Madimi One", sans-serif;
+    }
+
+    body {
+        background-color: #fffaf5;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140' viewBox='0 0 140 140'%3E%3Cg fill='none' stroke='%23ff6600' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round' opacity='0.11'%3E%3Cpath d='M18 36h32c0 11-7 18-16 18s-16-7-16-18z'/%3E%3Cpath d='M22 30l24-6M22 25l24-3'/%3E%3Cpath d='M96 22l18 28-28 6z'/%3E%3Ccircle cx='98' cy='38' r='2'/%3E%3Ccircle cx='104' cy='44' r='1.5'/%3E%3Cpath d='M30 88h16l-2 24H32z'/%3E%3Cpath d='M28 88h20M38 88l5-10'/%3E%3Cpath d='M92 84v28M89 84v9c0 3 6 3 6 0v-9M106 84v28'/%3E%3Cellipse cx='106' cy='89' rx='3.5' ry='5'/%3E%3Ccircle cx='68' cy='24' r='2'/%3E%3Ccircle cx='66' cy='70' r='2.5'/%3E%3C/g%3E%3C/svg%3E");
+        background-repeat: repeat;
+        color: #222222;
+    }
+
+    .dashboard-wrapper {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 30px 20px 60px 20px;
+    }
+
+    .stat-card {
+        background-color: #ffffff;
+        border: 1px solid #ffe4d1;
+        border-radius: 22px;
+        padding: 22px 26px;
+        box-shadow: 0 8px 22px rgba(255, 102, 0, 0.08);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        height: 100%;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 28px rgba(255, 102, 0, 0.16);
+    }
+
+    .stat-icon-box {
+        width: 52px;
+        height: 52px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+    }
+
+    .stat-label {
+        font-size: 14px;
+        color: #666666;
+        font-weight: bold;
+        margin-bottom: 4px;
+    }
+
+    .stat-value {
+        font-size: 28px;
+        font-weight: 800;
+        color: #222222;
+        line-height: 1.2;
+    }
+
+    .panel-card {
+        background-color: #ffffff;
+        border: 1px solid #ffe4d1;
+        border-radius: 24px;
+        padding: 26px 30px;
+        box-shadow: 0 8px 22px rgba(255, 102, 0, 0.08);
+    }
+
+    .period-btn {
+        border-radius: 50px;
+        padding: 6px 16px;
+        font-size: 13px;
+        font-weight: bold;
+        border: none;
+        background-color: transparent;
+        color: #555555;
+        text-decoration: none;
+        transition: 0.2s;
+    }
+
+    .period-btn:hover, .period-btn.active {
+        background-color: #ff6600;
+        color: #ffffff;
+    }
+
+    .top-food-table thead th {
+        background-color: #ff6600;
+        color: #ffffff;
+        border: none;
+        padding: 12px 16px;
+    }
+
+    .top-food-table tbody tr:nth-of-type(even) {
+        background-color: #fff8f2;
+    }
+</style>
+
+<div class="dashboard-wrapper madimi-one-regular">
+    <!-- ส่วนหัวและตัวกรองช่วงเวลา -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <div>
+            <h2 class="fw-bold text-dark mb-0">
+                <i class="bi bi-speedometer2 me-2" style="color: #ff6600;"></i>ภาพรวมร้านอาหาร
+            </h2>
+            <small class="text-muted">สรุปรายได้และจำนวนลูกค้าแบบเรียลไทม์</small>
+        </div>
+
+        <div class="d-flex gap-1 bg-white p-1 rounded-pill shadow-sm border" style="border-color: #ffd5b8 !important;">
+            <a asp-action="Dashboard" asp-route-period="today" class="period-btn @(currentPeriod == "today" ? "active" : "")">วันนี้</a>
+            <a asp-action="Dashboard" asp-route-period="7days" class="period-btn @(currentPeriod == "7days" ? "active" : "")">7 วันล่าสุด</a>
+            <a asp-action="Dashboard" asp-route-period="month" class="period-btn @(currentPeriod == "month" ? "active" : "")">เดือนนี้</a>
+            <a asp-action="Dashboard" asp-route-period="all" class="period-btn @(currentPeriod == "all" ? "active" : "")">ทั้งหมด</a>
+        </div>
+    </div>
+
+    <!-- ================= แถวที่ 1: สรุปรายได้ ================= -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <div class="stat-card d-flex justify-content-between align-items-center" style="border-left: 6px solid #ff6600;">
+                <div>
+                    <div class="stat-label">รายได้ทั้งหมด</div>
+                    <div class="stat-value" style="color: #ff6600;">@(((decimal)ViewBag.TotalRevenue).ToString("N0")) <span class="fs-6 fw-normal text-dark">บาท</span></div>
+                </div>
+                <div class="stat-icon-box" style="background-color: #fff0e3; color: #ff6600;">
+                    <i class="bi bi-cash-stack"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="stat-card d-flex justify-content-between align-items-center" style="border-left: 6px solid #198754;">
+                <div>
+                    <div class="stat-label">รายได้ทานที่ร้าน</div>
+                    <div class="stat-value text-success">@(((decimal)ViewBag.DineInRevenue).ToString("N0")) <span class="fs-6 fw-normal text-dark">บาท</span></div>
+                </div>
+                <div class="stat-icon-box" style="background-color: #e8f5e9; color: #198754;">
+                    <i class="bi bi-shop"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="stat-card d-flex justify-content-between align-items-center" style="border-left: 6px solid #0d6efd;">
+                <div>
+                    <div class="stat-label">รายได้จัดส่งถึงบ้าน</div>
+                    <div class="stat-value text-primary">@(((decimal)ViewBag.DeliveryRevenue).ToString("N0")) <span class="fs-6 fw-normal text-dark">บาท</span></div>
+                </div>
+                <div class="stat-icon-box" style="background-color: #e7f1ff; color: #0d6efd;">
+                    <i class="bi bi-bicycle"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= แถวที่ 2: จำนวนลูกค้าและคำสั่งซื้อ ================= -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <div class="stat-card d-flex justify-content-between align-items-center" style="border-left: 6px solid #ff9800;">
+                <div>
+                    <div class="stat-label">จำนวนคนที่มาทานที่ร้าน</div>
+                    <div class="stat-value">@ViewBag.DineInCustomers <span class="fs-6 fw-normal text-muted">คน</span></div>
+                </div>
+                <div class="stat-icon-box" style="background-color: #fff6e5; color: #ff9800;">
+                    <i class="bi bi-people-fill"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="stat-card d-flex justify-content-between align-items-center" style="border-left: 6px solid #ff9800;">
+                <div>
+                    <div class="stat-label">จำนวนคนที่สั่งจัดส่ง</div>
+                    <div class="stat-value">@ViewBag.DeliveryCustomers <span class="fs-6 fw-normal text-muted">คน</span></div>
+                </div>
+                <div class="stat-icon-box" style="background-color: #fff6e5; color: #ff9800;">
+                    <i class="bi bi-bag-check-fill"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="stat-card d-flex justify-content-between align-items-center" style="border-left: 6px solid #ff9800;">
+                <div>
+                    <div class="stat-label">คำสั่งซื้อทั้งหมด</div>
+                    <div class="stat-value">
+                        @ViewBag.TotalOrders <span class="fs-6 fw-normal text-muted">บิล</span>
+                        @if ((int)ViewBag.PendingOrders > 0)
+                        {
+                            <span class="badge rounded-pill ms-1" style="background-color: #fff0e3; color: #ff6600; border: 1px solid #ffd5b8; font-size: 12px;">
+                                รอดำเนินการ @ViewBag.PendingOrders
+                            </span>
+                        }
+                    </div>
+                </div>
+                <div class="stat-icon-box" style="background-color: #fff0e3; color: #ff6600;">
+                    <i class="bi bi-receipt"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= แถวที่ 3: กราฟรายได้และสัดส่วน ================= -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-8">
+            <div class="panel-card h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold mb-0"><i class="bi bi-bar-chart-line-fill me-2" style="color: #ff6600;"></i>กราฟรายได้ 7 วันล่าสุด</h5>
+                </div>
+                <div style="height: 290px;">
+                    <canvas id="revenueChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="panel-card h-100 d-flex flex-column justify-content-between">
+                <h5 class="fw-bold mb-3"><i class="bi bi-pie-chart-fill me-2" style="color: #ff6600;"></i>สัดส่วนรายได้</h5>
+                <div style="height: 220px; position: relative;">
+                    <canvas id="channelPieChart"></canvas>
+                </div>
+                <div class="text-center text-muted mt-2" style="font-size: 13px;">
+                    เปรียบเทียบยอดขายทานที่ร้านและจัดส่งถึงบ้าน
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= แถวที่ 4: เมนูขายดี 5 อันดับแรก ================= -->
+    <div class="panel-card">
+        <h5 class="fw-bold mb-3"><i class="bi bi-trophy-fill me-2" style="color: #ff6600;"></i>เมนูขายดี 5 อันดับแรก</h5>
+        <div class="table-responsive rounded-4 overflow-hidden border" style="border-color: #ffe4d1 !important;">
+            <table class="table top-food-table table-hover align-middle mb-0 bg-white">
+                <thead>
+                    <tr>
+                        <th class="text-center" style="width: 10%;">อันดับ</th>
+                        <th>ชื่อเมนูอาหาร</th>
+                        <th class="text-center" style="width: 20%;">จำนวนที่ขายได้</th>
+                        <th class="text-end pe-4" style="width: 25%;">ยอดขายรวม</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        int rank = 1;
+                        var topFoods = ViewBag.TopFoods as IEnumerable<dynamic>;
+                    }
+                    @if (topFoods != null && topFoods.Any())
+                    {
+                        foreach (var item in topFoods)
+                        {
+                            <tr>
+                                <td class="text-center fw-bold" style="color: #ff6600;">@rank</td>
+                                <td class="fw-bold">@item.FoodName</td>
+                                <td class="text-center">
+                                    <span class="badge rounded-pill px-3" style="background-color: #fff0e3; color: #ff6600; border: 1px solid #ffd5b8;">@item.TotalQty จาน</span>
+                                </td>
+                                <td class="text-end pe-4 fw-bold text-success">@(((decimal)item.TotalSales).ToString("N0")) บาท</td>
+                            </tr>
+                            rank++;
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="4" class="text-center text-muted py-4">ยังไม่มีข้อมูลการสั่งซื้อในช่วงเวลานี้</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const labels = @Html.Raw(ViewBag.ChartLabels);
+        const dineInData = @Html.Raw(ViewBag.ChartDineIn);
+        const deliveryData = @Html.Raw(ViewBag.ChartDelivery);
+
+        const ctxBar = document.getElementById('revenueChart').getContext('2d');
+        new Chart(ctxBar, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'ทานที่ร้าน (บาท)',
+                        data: dineInData,
+                        backgroundColor: '#198754',
+                        borderRadius: 6
+                    },
+                    {
+                        label: 'จัดส่งถึงบ้าน (บาท)',
+                        data: deliveryData,
+                        backgroundColor: '#ff6600',
+                        borderRadius: 6
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'top' }
+                },
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+
+        const totalDineIn = @ViewBag.DineInRevenue;
+        const totalDelivery = @ViewBag.DeliveryRevenue;
+        const ctxPie = document.getElementById('channelPieChart').getContext('2d');
+
+        new Chart(ctxPie, {
+            type: 'doughnut',
+            data: {
+                labels: ['ทานที่ร้าน', 'จัดส่งถึงบ้าน'],
+                datasets: [{
+                    data: (totalDineIn === 0 && totalDelivery === 0) ? [1, 1] : [totalDineIn, totalDelivery],
+                    backgroundColor: ['#198754', '#ff6600'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '65%',
+                plugins: {
+                    legend: { position: 'bottom' }
+                }
+            }
+        });
+    });
+</script>

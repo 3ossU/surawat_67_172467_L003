@@ -1,0 +1,310 @@
+@using surawat_67_172467_L003.Models
+@{
+    ViewData["Title"] = "จองโต๊ะอาหาร";
+    Layout = "_Layout";
+    var tables = ViewBag.Tables as List<DiningTable> ?? new List<DiningTable>();
+    var myBookings = ViewBag.MyBookings as List<TableBooking> ?? new List<TableBooking>();
+    var todayStr = DateTime.Now.ToString("yyyy-MM-dd");
+}
+
+<style>
+    .madimi-one-regular {
+        font-family: "Madimi One", sans-serif;
+    }
+
+    body {
+        background-color: #fffaf5;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140' viewBox='0 0 140 140'%3E%3Cg fill='none' stroke='%23ff6600' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round' opacity='0.11'%3E%3Cpath d='M18 36h32c0 11-7 18-16 18s-16-7-16-18z'/%3E%3Cpath d='M22 30l24-6M22 25l24-3'/%3E%3Cpath d='M96 22l18 28-28 6z'/%3E%3Ccircle cx='98' cy='38' r='2'/%3E%3Ccircle cx='104' cy='44' r='1.5'/%3E%3Cpath d='M30 88h16l-2 24H32z'/%3E%3Cpath d='M28 88h20M38 88l5-10'/%3E%3Cpath d='M92 84v28M89 84v9c0 3 6 3 6 0v-9M106 84v28'/%3E%3Cellipse cx='106' cy='89' rx='3.5' ry='5'/%3E%3Ccircle cx='68' cy='24' r='2'/%3E%3Ccircle cx='66' cy='70' r='2.5'/%3E%3C/g%3E%3C/svg%3E");
+        background-repeat: repeat;
+        color: #222222;
+    }
+
+    .booking-card {
+        background-color: #ffffff;
+        border: 1px solid #ffe4d1;
+        border-top: 6px solid #ff6600;
+        border-radius: 28px;
+        box-shadow: 0 12px 32px rgba(255, 102, 0, 0.1);
+        color: #222222;
+        max-width: 880px;
+        margin: 45px auto 90px auto;
+        padding: 40px 50px;
+    }
+
+    .booking-title {
+        font-size: 32px;
+        font-weight: 800;
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .form-label-custom {
+        font-size: 14px;
+        font-weight: bold;
+        margin-bottom: 6px;
+        display: block;
+        color: #333333;
+    }
+
+    .booking-input {
+        background-color: #fff8f2;
+        border: 1.5px solid #ffd5b8;
+        border-radius: 50px;
+        color: #222222;
+        padding: 10px 18px;
+        font-size: 15px;
+        transition: 0.2s;
+    }
+
+    .booking-input::placeholder {
+        color: #999999;
+        font-size: 13px;
+    }
+
+    .booking-input:focus {
+        background-color: #ffffff;
+        color: #222222;
+        border-color: #ff6600;
+        outline: none;
+        box-shadow: 0 0 0 0.2rem rgba(255, 102, 0, 0.15);
+    }
+
+    .time-chip {
+        background-color: #fff6ef;
+        color: #ff6600;
+        border: 1.5px solid #ffd5b8;
+        border-radius: 50px;
+        padding: 5px 15px;
+        font-size: 13px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: 0.15s;
+    }
+
+    .time-chip:hover, .time-chip.active {
+        background-color: #ff6600;
+        border-color: #ff6600;
+        color: #ffffff;
+    }
+
+    .summary-box {
+        background-color: #fff6ef;
+        border-radius: 18px;
+        padding: 16px 20px;
+        font-size: 14px;
+        border: 1.5px dashed #ff944d;
+    }
+
+    .btn-confirm-booking {
+        background: linear-gradient(135deg, #ff6600, #e64a00);
+        color: #ffffff;
+        font-weight: bold;
+        border: none;
+        border-radius: 50px;
+        padding: 12px 38px;
+        font-size: 16px;
+        transition: 0.2s;
+        box-shadow: 0 6px 16px rgba(255, 102, 0, 0.3);
+    }
+
+    .btn-confirm-booking:hover {
+        background: linear-gradient(135deg, #e65c00, #cc3d00);
+        color: #ffffff;
+        transform: translateY(-2px);
+    }
+
+    .booking-history-row {
+        background-color: #fffaf5;
+        border: 1.5px solid #ffe0c7;
+        border-radius: 16px;
+        padding: 14px 20px;
+        transition: 0.2s;
+    }
+
+    .booking-history-row:hover {
+        border-color: #ff6600;
+    }
+</style>
+
+<div class="booking-card madimi-one-regular">
+    <div class="booking-title">
+        <i class="bi bi-calendar-check-fill me-2" style="color: #ff6600;"></i>จองโต๊ะอาหาร
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success rounded-4 text-center py-2 mb-4">
+            <i class="bi bi-check-circle-fill me-1"></i> @TempData["Success"]
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger rounded-4 text-center py-2 mb-4">
+            <i class="bi bi-exclamation-circle-fill me-1"></i> @TempData["Error"]
+        </div>
+    }
+
+    <form asp-controller="Booking" asp-action="Create" method="post">
+        <div class="row g-4">
+            <!-- ================= ฝั่งซ้าย ================= -->
+            <div class="col-md-6 d-flex flex-column gap-3">
+                <div class="row g-2">
+                    <div class="col-6">
+                        <label class="form-label-custom"><i class="bi bi-people-fill me-1" style="color: #ff6600;"></i>จำนวนที่นั่ง</label>
+                        <select name="totalMember" id="totalMemberInput" class="form-select booking-input" onchange="updateBookingSummary()" required>
+                            @for (int i = 1; i <= 10; i++)
+                            {
+                                if (i == 2)
+                                {
+                                    <option value="@i" selected>@i ท่าน</option>
+                                }
+                                else
+                                {
+                                    <option value="@i">@i ท่าน</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label-custom"><i class="bi bi-grid-1x2-fill me-1" style="color: #ff6600;"></i>เลือกโต๊ะ</label>
+                        <select name="tableId" id="tableSelectInput" class="form-select booking-input" onchange="updateBookingSummary()">
+                            <option value="0">จัดโต๊ะให้อัตโนมัติ</option>
+                            @foreach (var t in tables)
+                            {
+                                <option value="@t.Id">โต๊ะ @t.TableNumber (@t.Capacity ที่นั่ง)</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="form-label-custom"><i class="bi bi-calendar-date-fill me-1" style="color: #ff6600;"></i>วันที่จอง</label>
+                    <input type="date" name="bookingDate" id="bookingDateInput" class="form-control booking-input"
+                           value="@todayStr" min="@todayStr" onchange="updateBookingSummary()" required />
+                </div>
+
+                <div>
+                    <label class="form-label-custom"><i class="bi bi-clock-fill me-1" style="color: #ff6600;"></i>เวลา</label>
+                    <input type="time" name="bookingTime" id="bookingTimeInput" class="form-control booking-input mb-2"
+                           value="19:00" onchange="updateBookingSummary()" required />
+
+                    <div class="d-flex flex-wrap gap-2 mt-1">
+                        <button type="button" class="time-chip" onclick="setQuickTime('12:00', this)">12:00</button>
+                        <button type="button" class="time-chip" onclick="setQuickTime('17:30', this)">17:30</button>
+                        <button type="button" class="time-chip active" onclick="setQuickTime('19:00', this)">19:00</button>
+                        <button type="button" class="time-chip" onclick="setQuickTime('20:00', this)">20:00</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= ฝั่งขวา ================= -->
+            <div class="col-md-6 d-flex flex-column justify-content-between gap-3">
+                <div class="d-flex flex-column gap-3">
+                    <div>
+                        <label class="form-label-custom"><i class="bi bi-person-fill me-1" style="color: #ff6600;"></i>ชื่อคนจอง</label>
+                        <input type="text" name="customerName" id="customerNameInput" class="form-control booking-input"
+                               placeholder="กรอกชื่อ-นามสกุลผู้จอง" oninput="updateBookingSummary()" required />
+                    </div>
+
+                    <div>
+                        <label class="form-label-custom"><i class="bi bi-telephone-fill me-1" style="color: #ff6600;"></i>เบอร์โทรติดต่อ</label>
+                        <input type="tel" name="phoneNumber" id="phoneInput" class="form-control booking-input"
+                               placeholder="08xxxxxxxx" maxlength="10" pattern="[0-9]{10}" inputmode="numeric"
+                               oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);" required />
+                    </div>
+
+                    <div class="summary-box mt-1">
+                        <div class="fw-bold mb-1" style="color: #ff6600;"><i class="bi bi-info-circle-fill me-1"></i> สรุปข้อมูลการจอง</div>
+                        <div class="text-secondary" style="font-size: 13px;">
+                            <div>ผู้จอง: <span id="sumName" class="text-dark fw-bold">-</span></div>
+                            <div>จำนวน: <span id="sumGuests" class="text-dark fw-bold">2 ท่าน</span> (<span id="sumTable">จัดโต๊ะให้อัตโนมัติ</span>)</div>
+                            <div>วัน-เวลา: <span id="sumDateTime" class="text-dark fw-bold">@DateTime.Now.ToString("dd/MM/yyyy") เวลา 19:00 น.</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end mt-2">
+                    <button type="submit" class="btn btn-confirm-booking">
+                        <i class="bi bi-check-circle-fill me-2"></i>ยืนยันการจอง
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    @if (myBookings.Any())
+    {
+        <hr class="my-4" style="border-color: #ffd5b8;" />
+        <div class="fw-bold mb-3" style="font-size: 16px; color: #ff6600;">
+            <i class="bi bi-bookmark-check-fill me-1"></i> รายการจองโต๊ะล่าสุด
+        </div>
+        <div class="d-flex flex-column gap-2">
+            @foreach (var b in myBookings)
+            {
+                <div class="booking-history-row d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <div>
+                        <div class="fw-bold text-dark" style="font-size: 15px;">
+                            คุณ @b.CustomerName | โต๊ะ @(b.Table?.TableNumber ?? "-") (@b.TotalMember ท่าน)
+                        </div>
+                        <div class="text-muted" style="font-size: 13px;">
+                            วันที่ @b.BookingDate.ToString("dd/MM/yyyy") เวลา @b.BookingTime.ToString("HH:mm") น. | โทร @b.PhoneNumber
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-2">
+                        @if (b.Status == "CONFIRMED")
+                        {
+                            <span class="badge bg-success rounded-pill px-3 py-2">ยืนยันแล้ว</span>
+                            <form asp-controller="Booking" asp-action="Cancel" method="post" class="m-0"
+                                  onsubmit="return confirm('ต้องการยกเลิกการจองนี้หรือไม่?');">
+                                <input type="hidden" name="id" value="@b.Id" />
+                                <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3">ยกเลิก</button>
+                            </form>
+                        }
+                        else if (b.Status == "CANCELLED")
+                        {
+                            <span class="badge bg-secondary rounded-pill px-3 py-2">ยกเลิกแล้ว</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-dark rounded-pill px-3 py-2">@b.Status</span>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        function setQuickTime(timeVal, btnElement) {
+            document.getElementById('bookingTimeInput').value = timeVal;
+            document.querySelectorAll('.time-chip').forEach(btn => btn.classList.remove('active'));
+            btnElement.classList.add('active');
+            updateBookingSummary();
+        }
+
+        function updateBookingSummary() {
+            const name = document.getElementById('customerNameInput').value.trim() || "-";
+            const guests = document.getElementById('totalMemberInput').value;
+            const tableSelect = document.getElementById('tableSelectInput');
+            const tableText = tableSelect.options[tableSelect.selectedIndex].text;
+            const rawDate = document.getElementById('bookingDateInput').value;
+            const time = document.getElementById('bookingTimeInput').value;
+
+            let formattedDate = rawDate;
+            if (rawDate) {
+                const parts = rawDate.split('-');
+                if (parts.length === 3) {
+                    formattedDate = `${parts[2]}/${parts[1]}/${parts[0]}`;
+                }
+            }
+
+            document.getElementById('sumName').innerText = name;
+            document.getElementById('sumGuests').innerText = `${guests} ท่าน`;
+            document.getElementById('sumTable').innerText = tableText;
+            document.getElementById('sumDateTime').innerText = `${formattedDate} เวลา ${time} น.`;
+        }
+    </script>
+}

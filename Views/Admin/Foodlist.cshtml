@@ -1,0 +1,563 @@
+@model IEnumerable<surawat_67_172467_L003.Models.Food>
+@using surawat_67_172467_L003.Models
+@{
+    ViewData["Title"] = "จัดการเมนูอาหาร";
+    Layout = "AdminLayout";
+    var categories = ViewBag.Categories as List<Category> ?? new List<Category>();
+}
+
+<style>
+    .madimi-one-regular {
+        font-family: "Madimi One", sans-serif;
+    }
+
+    body {
+        background-color: #fffaf5;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140' viewBox='0 0 140 140'%3E%3Cg fill='none' stroke='%23ff6600' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round' opacity='0.11'%3E%3Cpath d='M18 36h32c0 11-7 18-16 18s-16-7-16-18z'/%3E%3Cpath d='M22 30l24-6M22 25l24-3'/%3E%3Cpath d='M96 22l18 28-28 6z'/%3E%3Ccircle cx='98' cy='38' r='2'/%3E%3Ccircle cx='104' cy='44' r='1.5'/%3E%3Cpath d='M30 88h16l-2 24H32z'/%3E%3Cpath d='M28 88h20M38 88l5-10'/%3E%3Cpath d='M92 84v28M89 84v9c0 3 6 3 6 0v-9M106 84v28'/%3E%3Cellipse cx='106' cy='89' rx='3.5' ry='5'/%3E%3Ccircle cx='68' cy='24' r='2'/%3E%3Ccircle cx='66' cy='70' r='2.5'/%3E%3C/g%3E%3C/svg%3E");
+        background-repeat: repeat;
+        color: #222222;
+    }
+
+    .search-container {
+        max-width: 460px;
+    }
+
+    .search-input {
+        background-color: #ffffff;
+        border: 1.5px solid #ffd5b8;
+        color: #222222;
+    }
+
+    .search-input:focus {
+        background-color: #ffffff;
+        border-color: #ff6600;
+        box-shadow: 0 0 0 0.2rem rgba(255, 102, 0, 0.15);
+    }
+
+    .btn-add-food {
+        background: linear-gradient(135deg, #ff6600, #e64a00);
+        color: #ffffff;
+        font-weight: bold;
+        border-radius: 50px;
+        padding: 10px 24px;
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        box-shadow: 0 6px 16px rgba(255, 102, 0, 0.3);
+        transition: 0.2s;
+    }
+
+    .btn-add-food:hover {
+        background: linear-gradient(135deg, #e65c00, #cc3d00);
+        color: #ffffff;
+        transform: translateY(-2px);
+    }
+
+    .table-wrapper {
+        background-color: #ffffff;
+        border: 1px solid #ffe4d1;
+        border-radius: 20px;
+        box-shadow: 0 10px 28px rgba(255, 102, 0, 0.08);
+        overflow: hidden;
+    }
+
+    .custom-table thead th {
+        background-color: #ff6600;
+        color: #ffffff;
+        border: none;
+        padding: 14px 18px;
+        font-weight: bold;
+    }
+
+    .custom-table tbody tr:nth-of-type(odd) {
+        background-color: #ffffff;
+    }
+
+    .custom-table tbody tr:nth-of-type(even) {
+        background-color: #fff8f2;
+    }
+
+    .custom-table tbody tr:hover {
+        background-color: #ffefe3;
+    }
+
+    .custom-table td {
+        padding: 12px 18px;
+        border-bottom: 1px solid #ffefe3;
+        color: #222222;
+    }
+
+    .food-thumb {
+        width: 58px;
+        height: 46px;
+        object-fit: cover;
+        border-radius: 10px;
+        border: 1px solid #ffd5b8;
+        background-color: #fff0e3;
+        color: #ff6600;
+    }
+
+    .btn-inspect {
+        background-color: #fff0e3;
+        color: #ff6600;
+        border: 1px solid #ffd5b8;
+        border-radius: 50px;
+        padding: 5px 16px;
+        font-size: 13px;
+        font-weight: bold;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    .btn-inspect:hover {
+        background-color: #ff6600;
+        color: #ffffff;
+    }
+
+    .food-modal .modal-content {
+        background-color: #fffaf5;
+        border: 1px solid #ffe4d1;
+        border-top: 6px solid #ff6600;
+        border-radius: 24px;
+        padding: 30px 38px;
+        box-shadow: 0 14px 36px rgba(0, 0, 0, 0.2);
+        color: #222222;
+    }
+
+    .food-label {
+        font-size: 14px;
+        font-weight: bold;
+        margin-bottom: 6px;
+        display: block;
+        color: #333333;
+    }
+
+    .food-input {
+        background-color: #ffffff;
+        border: 1.5px solid #ffd5b8;
+        border-radius: 14px;
+        color: #222222;
+        padding: 10px 16px;
+        font-size: 14px;
+        transition: 0.2s;
+    }
+
+    .food-input:focus {
+        background-color: #ffffff;
+        border-color: #ff6600;
+        color: #222222;
+        box-shadow: 0 0 0 0.2rem rgba(255, 102, 0, 0.15);
+    }
+
+    .img-preview-box {
+        width: 100%;
+        height: 175px;
+        background-color: #fff0e3;
+        border-radius: 16px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        color: #ff6600;
+        border: 2px dashed #ff944d;
+    }
+
+    .img-preview-box img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .btn-save-food {
+        background-color: #ff6600;
+        color: #ffffff;
+        font-weight: bold;
+        border: none;
+        border-radius: 50px;
+        padding: 10px 34px;
+        font-size: 15px;
+        transition: 0.2s;
+    }
+
+    .btn-save-food:hover {
+        background-color: #e05500;
+        color: #ffffff;
+    }
+</style>
+
+<div class="d-flex justify-content-center align-items-center py-4 madimi-one-regular">
+    <div class="container" style="max-width: 980px;">
+
+        <div class="mb-4">
+            <h3 class="fw-bold mb-0 text-dark">
+                <i class="bi bi-egg-fried me-2" style="color: #ff6600;"></i>จัดการเมนูอาหาร
+            </h3>
+            <small class="text-muted">เพิ่ม แก้ไขราคา รูปภาพ และสถานะความพร้อมขายของเมนูอาหาร</small>
+        </div>
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success rounded-4 text-center py-2 mb-4">
+                <i class="bi bi-check-circle-fill me-1"></i> @TempData["Success"]
+            </div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger rounded-4 text-center py-2 mb-4">
+                <i class="bi bi-exclamation-triangle-fill me-1"></i> @TempData["Error"]
+            </div>
+        }
+
+        <!-- แถบค้นหาและปุ่มเพิ่มเมนู -->
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+            <div class="search-container w-100 position-relative">
+                <input type="text"
+                       id="liveSearchFood"
+                       class="form-control rounded-pill search-input px-4 py-2 pe-5"
+                       placeholder="พิมพ์เพื่อค้นหา ชื่ออาหาร, รหัส, หมวดหมู่..."
+                       autocomplete="off" />
+                <span class="position-absolute end-0 top-50 translate-middle-y me-3 pe-none" style="color: #ff6600;">
+                    <i class="bi bi-search fs-5"></i>
+                </span>
+            </div>
+
+            <button type="button" class="btn-add-food" data-bs-toggle="modal" data-bs-target="#addFoodModal">
+                <span>เพิ่มเมนูอาหาร</span>
+                <i class="bi bi-plus-circle-fill fs-5"></i>
+            </button>
+        </div>
+
+        <!-- ตารางรายการอาหาร -->
+        <div class="table-responsive table-wrapper">
+            <table class="table custom-table align-middle m-0">
+                <thead>
+                    <tr>
+                        <th scope="col" style="width: 10%; text-align: center;">รหัส</th>
+                        <th scope="col" style="width: 12%; text-align: center;">รูปภาพ</th>
+                        <th scope="col" style="width: 26%;">ชื่อเมนูอาหาร</th>
+                        <th scope="col" style="width: 16%; text-align: center;">หมวดหมู่</th>
+                        <th scope="col" style="width: 12%; text-align: center;">ราคา</th>
+                        <th scope="col" style="width: 12%; text-align: center;">สถานะ</th>
+                        <th scope="col" style="width: 12%; text-align: center;">จัดการ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        @foreach (var item in Model)
+                        {
+                            var catName = item.Category?.Name ?? "-";
+                            var statusText = item.IsAvailable == true ? "พร้อมขาย" : "หมด";
+
+                            <tr class="food-row" data-search="@($"{item.Id} {item.Name} {catName} {statusText}".ToLower())">
+                                <td class="text-center fw-bold">@item.Id</td>
+                                <td class="text-center">
+                                    @if (!string.IsNullOrEmpty(item.ImageUrl))
+                                    {
+                                        <img src="@item.ImageUrl" alt="@item.Name" class="food-thumb" />
+                                    }
+                                    else
+                                    {
+                                        <div class="food-thumb d-inline-flex align-items-center justify-content-center">
+                                            <i class="bi bi-image"></i>
+                                        </div>
+                                    }
+                                </td>
+                                <td class="fw-bold">@item.Name</td>
+                                <td class="text-center">
+                                    <span class="badge rounded-pill px-3" style="background-color: #fff0e3; color: #ff6600; border: 1px solid #ffd5b8;">@catName</span>
+                                </td>
+                                <td class="text-center fw-bold text-success">@item.Price.ToString("N0") บาท</td>
+                                <td class="text-center">
+                                    @if (item.IsAvailable == true)
+                                    {
+                                        <span class="badge bg-success rounded-pill px-3">พร้อมขาย</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary rounded-pill px-3">หมด</span>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    <button type="button"
+                                            class="btn-inspect btn-edit-food"
+                                            data-id="@item.Id"
+                                            data-name="@item.Name"
+                                            data-category="@item.CategoryId"
+                                            data-price="@item.Price"
+                                            data-desc="@item.Description"
+                                            data-img="@item.ImageUrl"
+                                            data-available="@(item.IsAvailable == true ? "true" : "false")">
+                                        แก้ไข <i class="bi bi-pencil-square"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    }
+
+                    <tr id="noFoodRow" style="@(Model != null && Model.Any() ? "display: none;" : "")">
+                        <td colspan="7" class="text-center text-muted py-4">
+                            ยังไม่มีรายการอาหารในระบบ
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- ===================================================================== -->
+<!-- หน้าต่างเพิ่มเมนูอาหารใหม่ -->
+<!-- ===================================================================== -->
+<div class="modal fade food-modal madimi-one-regular" id="addFoodModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 740px;">
+        <div class="modal-content position-relative">
+            <button type="button" class="btn-close position-absolute top-0 end-0 m-3" data-bs-dismiss="modal" aria-label="Close"></button>
+
+            <h3 class="fw-bold mb-4"><i class="bi bi-plus-circle-fill me-2" style="color: #ff6600;"></i>เพิ่มเมนูอาหารใหม่</h3>
+
+            <form asp-controller="Admin" asp-action="CreateFood" method="post" enctype="multipart/form-data">
+                <div class="row g-4">
+                    <div class="col-md-5 d-flex flex-column gap-3">
+                        <div class="img-preview-box" id="addPreviewBox">
+                            <i class="bi bi-camera fs-1 mb-1"></i>
+                            <span style="font-size: 13px;">ตัวอย่างรูปภาพอาหาร</span>
+                        </div>
+
+                        <div>
+                            <label class="food-label">อัปโหลดรูปภาพจากเครื่อง</label>
+                            <input type="file" name="imageFile" id="addImageFile" class="form-control food-input" accept="image/*" />
+                        </div>
+
+                        <div>
+                            <label class="food-label">หรือใส่ลิงก์รูปภาพ</label>
+                            <input type="text" name="imageUrl" id="addImageUrl" class="form-control food-input" placeholder="https://..." />
+                        </div>
+                    </div>
+
+                    <div class="col-md-7 d-flex flex-column gap-3">
+                        <div>
+                            <label class="food-label">ชื่อเมนูอาหาร <span class="text-danger">*</span></label>
+                            <input type="text" name="name" class="form-control food-input" placeholder="เช่น ข้าวกะเพราหมูกรอบ" required />
+                        </div>
+
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <label class="food-label">หมวดหมู่ <span class="text-danger">*</span></label>
+                                <select name="categoryId" class="form-select food-input" required>
+                                    <option value="" disabled selected>-- เลือกหมวดหมู่ --</option>
+                                    @foreach (var c in categories)
+                                    {
+                                        <option value="@c.Id">@c.Name</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <label class="food-label">ราคา (บาท) <span class="text-danger">*</span></label>
+                                <input type="number" name="price" class="form-control food-input" min="0" step="1" placeholder="60" required />
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="food-label">รายละเอียดเมนู</label>
+                            <textarea name="description" rows="3" class="form-control food-input" placeholder="คำอธิบายส่วนประกอบหรือรสชาติ..."></textarea>
+                        </div>
+
+                        <div class="form-check form-switch mt-1">
+                            <input class="form-check-input" type="checkbox" name="isAvailable" value="true" id="addIsAvailable" checked style="cursor: pointer;">
+                            <label class="form-check-label fw-bold" for="addIsAvailable">เปิดขายเมนูนี้ทันที</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+                    <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">ยกเลิก</button>
+                    <button type="submit" class="btn btn-save-food">
+                        <i class="bi bi-check-lg me-1"></i> บันทึกเมนูอาหาร
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ===================================================================== -->
+<!-- หน้าต่างแก้ไขและลบเมนูอาหาร -->
+<!-- ===================================================================== -->
+<div class="modal fade food-modal madimi-one-regular" id="editFoodModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 740px;">
+        <div class="modal-content position-relative">
+            <button type="button" class="btn-close position-absolute top-0 end-0 m-3" data-bs-dismiss="modal" aria-label="Close"></button>
+
+            <h3 class="fw-bold mb-4"><i class="bi bi-pencil-square me-2" style="color: #ff6600;"></i>แก้ไขเมนูอาหาร</h3>
+
+            <form asp-controller="Admin" asp-action="EditFood" method="post" enctype="multipart/form-data">
+                <input type="hidden" name="id" id="editFoodId" />
+
+                <div class="row g-4">
+                    <div class="col-md-5 d-flex flex-column gap-3">
+                        <div class="img-preview-box" id="editPreviewBox">
+                            <i class="bi bi-camera fs-1 mb-1"></i>
+                            <span style="font-size: 13px;">ตัวอย่างรูปภาพอาหาร</span>
+                        </div>
+
+                        <div>
+                            <label class="food-label">เปลี่ยนรูปภาพ (อัปโหลดใหม่)</label>
+                            <input type="file" name="imageFile" id="editImageFile" class="form-control food-input" accept="image/*" />
+                        </div>
+
+                        <div>
+                            <label class="food-label">หรือแก้ไขลิงก์รูปภาพ</label>
+                            <input type="text" name="imageUrl" id="editImageUrl" class="form-control food-input" placeholder="https://..." />
+                        </div>
+                    </div>
+
+                    <div class="col-md-7 d-flex flex-column gap-3">
+                        <div>
+                            <label class="food-label">ชื่อเมนูอาหาร <span class="text-danger">*</span></label>
+                            <input type="text" name="name" id="editFoodName" class="form-control food-input" required />
+                        </div>
+
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <label class="food-label">หมวดหมู่ <span class="text-danger">*</span></label>
+                                <select name="categoryId" id="editFoodCategory" class="form-select food-input" required>
+                                    @foreach (var c in categories)
+                                    {
+                                        <option value="@c.Id">@c.Name</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <label class="food-label">ราคา (บาท) <span class="text-danger">*</span></label>
+                                <input type="number" name="price" id="editFoodPrice" class="form-control food-input" min="0" step="1" required />
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="food-label">รายละเอียดเมนู</label>
+                            <textarea name="description" id="editFoodDesc" rows="3" class="form-control food-input"></textarea>
+                        </div>
+
+                        <div class="form-check form-switch mt-1">
+                            <input class="form-check-input" type="checkbox" name="isAvailable" value="true" id="editIsAvailable" style="cursor: pointer;">
+                            <label class="form-check-label fw-bold" for="editIsAvailable">สถานะพร้อมขาย</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+                    <button type="button" class="btn btn-danger rounded-pill px-4" onclick="submitDeleteFood()">
+                        <i class="bi bi-trash-fill me-1"></i> ลบเมนูนี้
+                    </button>
+
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">ยกเลิก</button>
+                        <button type="submit" class="btn btn-save-food">
+                            <i class="bi bi-check-lg me-1"></i> บันทึกการแก้ไข
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <form id="deleteFoodForm" asp-controller="Admin" asp-action="DeleteFood" method="post" class="d-none">
+                <input type="hidden" name="id" id="deleteFoodIdInput" />
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const searchInput = document.getElementById('liveSearchFood');
+        const foodRows = document.querySelectorAll('.food-row');
+        const noFoodRow = document.getElementById('noFoodRow');
+
+        searchInput.addEventListener('input', function () {
+            const keyword = this.value.trim().toLowerCase();
+            let visibleCount = 0;
+
+            foodRows.forEach(row => {
+                const text = row.getAttribute('data-search') || '';
+                if (text.includes(keyword)) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            if (noFoodRow) {
+                noFoodRow.style.display = visibleCount === 0 ? '' : 'none';
+            }
+        });
+
+        function setupImagePreview(fileInputId, urlInputId, previewBoxId) {
+            const fileInput = document.getElementById(fileInputId);
+            const urlInput = document.getElementById(urlInputId);
+            const previewBox = document.getElementById(previewBoxId);
+
+            fileInput.addEventListener('change', function () {
+                if (this.files && this.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = e => {
+                        previewBox.innerHTML = `<img src="${e.target.result}" alt="Preview" />`;
+                    };
+                    reader.readAsDataURL(this.files[0]);
+                }
+            });
+
+            urlInput.addEventListener('input', function () {
+                const url = this.value.trim();
+                if (url) {
+                    previewBox.innerHTML = `<img src="${url}" alt="Preview" onerror="this.parentElement.innerHTML='<span class=text-danger>โหลดรูปไม่สำเร็จ</span>'" />`;
+                }
+            });
+        }
+
+        setupImagePreview('addImageFile', 'addImageUrl', 'addPreviewBox');
+        setupImagePreview('editImageFile', 'editImageUrl', 'editPreviewBox');
+
+        const editModal = new bootstrap.Modal(document.getElementById('editFoodModal'));
+        document.querySelectorAll('.btn-edit-food').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const id = this.getAttribute('data-id');
+                const name = this.getAttribute('data-name');
+                const category = this.getAttribute('data-category');
+                const price = this.getAttribute('data-price');
+                const desc = this.getAttribute('data-desc') || '';
+                const img = this.getAttribute('data-img') || '';
+                const isAvailable = this.getAttribute('data-available') === 'true';
+
+                document.getElementById('editFoodId').value = id;
+                document.getElementById('deleteFoodIdInput').value = id;
+                document.getElementById('editFoodName').value = name;
+                document.getElementById('editFoodCategory').value = category;
+                document.getElementById('editFoodPrice').value = price;
+                document.getElementById('editFoodDesc').value = desc;
+                document.getElementById('editImageUrl').value = img;
+                document.getElementById('editIsAvailable').checked = isAvailable;
+
+                const previewBox = document.getElementById('editPreviewBox');
+                if (img) {
+                    previewBox.innerHTML = `<img src="${img}" alt="${name}" />`;
+                } else {
+                    previewBox.innerHTML = `<i class="bi bi-camera fs-1 mb-1"></i><span style="font-size: 13px;">ไม่มีรูปภาพ</span>`;
+                }
+
+                editModal.show();
+            });
+        });
+    });
+
+    function submitDeleteFood() {
+        if (confirm('ยืนยันที่จะลบเมนูอาหารนี้ออกจากระบบหรือไม่?')) {
+            document.getElementById('deleteFoodForm').submit();
+        }
+    }
+</script>

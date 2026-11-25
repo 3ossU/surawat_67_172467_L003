@@ -1,0 +1,401 @@
+@model IEnumerable<surawat_67_172467_L003.Models.User>
+@{
+    ViewData["Title"] = "User List";
+    Layout = "AdminLayout"; 
+}
+
+<style>
+    .search-container {
+        max-width: 500px;
+    }
+
+    .search-input {
+        background-color: #d1d1d1;
+        border: 2px solid #333333;
+        color: #333;
+    }
+
+    .search-input::placeholder {
+        color: #666666;
+    }
+
+    .custom-table thead th {
+        background-color: #363636;
+        color: #ffffff;
+        border: none;
+        padding: 12px 20px;
+        font-weight: normal;
+    }
+
+    .custom-table tbody tr:nth-of-type(odd) {
+        background-color: #ffffff;
+    }
+
+    .custom-table tbody tr:nth-of-type(even) {
+        background-color: #e5e5e5;
+    }
+
+    .custom-table td {
+        padding: 10px 20px;
+        border: none;
+        color: #111111;
+    }
+
+    .btn-inspect {
+        background-color: #707070;
+        color: #ffffff;
+        border-radius: 8px;
+        padding: 4px 14px;
+        border: none;
+        font-size: 14px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .btn-inspect:hover {
+        background-color: #505050;
+        color: #ffffff;
+    }
+</style>
+<!-- ========================================== 
+Modal css
+ ========================================== -->
+<style>
+    /* Backdrop สีเทาเข้มแบบโปร่งแสง */
+    .modal-backdrop.show {
+        opacity: 0.65;
+        background-color: #2b2b2b;
+    }
+
+    /* กล่อง Modal สไตล์มินิมอลตามแบบรูป */
+    .custom-inspect-modal .modal-content {
+        background-color: #e3e3e3;
+        border: none;
+        border-radius: 12px;
+        padding: 30px 40px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+        color: #1a1a1a;
+    }
+
+    .modal-user-title {
+        font-size: 32px;
+        font-weight: 800;
+        margin-bottom: 24px;
+        color: #000;
+    }
+
+    .user-info-text {
+        font-size: 15px;
+        line-height: 1.8;
+        color: #111;
+    }
+
+    .user-info-text strong {
+        font-weight: 600;
+    }
+
+    /* กล่องรายการ Order History สีเทาเข้มพร้อม Scrollbar */
+    .order-history-title {
+        font-size: 16px;
+        font-weight: bold;
+        margin-bottom: 10px;
+        color: #000;
+    }
+
+    .order-history-box {
+        background-color: #8c8c8c;
+        color: #111;
+        border-radius: 4px;
+        height: 240px;
+        overflow-y: auto;
+        padding: 14px 18px;
+        font-size: 14px;
+        line-height: 1.7;
+    }
+
+    /* Custom Scrollbar ให้เหมือนดีไซน์ */
+    .order-history-box::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .order-history-box::-webkit-scrollbar-track {
+        background: #737373;
+    }
+
+    .order-history-box::-webkit-scrollbar-thumb {
+        background: #333333;
+        border-radius: 4px;
+    }
+
+    /* ปุ่ม Action สองปุ่มด้านล่าง */
+    .btn-suspend-account {
+        background-color: #5c5c5c;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        padding: 8px 24px;
+        font-size: 14px;
+        transition: 0.2s;
+    }
+
+    .btn-suspend-account:hover {
+        background-color: #444;
+        color: #fff;
+    }
+
+    .btn-delete-account {
+        background-color: #5c5c5c;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        padding: 8px 24px;
+        font-size: 14px;
+        transition: 0.2s;
+    }
+
+    .btn-delete-account:hover {
+        background-color: #b02a37;
+        /* สีแดงเข้มตอนชี้เพื่อเตือนการลบ */
+        color: #fff;
+    }
+</style>
+
+
+<div class="d-flex justify-content-center align-items-center py-5">
+    <div class="container" style="max-width: 900px;">
+        <!-- ช่องค้นหา -->
+        <div class="d-flex justify-content-end mb-4">
+            <form asp-controller="Home" asp-action="Userlist" class="search-container w-100 position-relative">
+                <input type="text" name="searchString" class="form-control rounded-pill search-input px-4 py-2 pe-5"
+                       placeholder="Username,id" />
+                <button type="submit"
+                        class="btn border-0 position-absolute end-0 top-50 translate-middle-y me-2 p-0 text-dark">
+                    <i class="bi bi-search fs-5"></i>
+                </button>
+            </form>
+        </div>
+
+        <!-- ตารางข้อมูล -->
+        <div class="table-responsive rounded shadow-sm overflow-hidden">
+            <table class="table custom-table align-middle m-0">
+                <thead>
+                    <tr>
+                        <th scope="col" style="width: 12%; text-align: center;">User id</th>
+                        <th scope="col" style="width: 33%;">ชื่อผู้ใช้งาน</th>
+                        <th scope="col" style="width: 20%; text-align: center;">ตำแหน่ง</th>
+                        <th scope="col" style="width: 15%; text-align: center;">สถานะ</th>
+                        <th scope="col" style="width: 20%; text-align: center;"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="text-center">@item.Id</td>
+                                <td>@item.FirstName @item.LastName</td>
+                                <td class="text-center">
+                                    @* แสดงชื่อตำแหน่งตาม RoleId *@
+                                    @if (item.RoleId == 1)
+                                    {
+                                        <span>CUSTOMER</span>
+                                    }
+                                    else if (item.RoleId == 2)
+                                    {
+
+                                        <span>ADMIN</span>
+                                    }
+                                    else if (item.RoleId == 3)
+                                    {
+
+                                        <span>MANAGER</span>
+                                    }
+                                    else if (item.RoleId == 4)
+                                    {
+
+                                        <span>CHEF</span>
+                                    }
+                                    else if (item.RoleId == 5)
+                                    {
+
+                                        <span>DELIVERY</span>
+                                    }
+                                    else
+                                    {
+
+                                        <span>-</span>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    @(item.IsActive == true ? "ปกติ" : "ถูกระงับ")
+                                </td>
+                                <td class="text-center">
+                                    <a asp-controller="Home" asp-action="Inspect" asp-route-id="@item.Id" class="btn-inspect">
+                                        Inspect <i class="bi bi-search"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center text-muted py-4">
+                                ไม่พบข้อมูลผู้ใช้งาน
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+<!-- ========================================== 
+Modal html
+ ========================================== -->
+<div class="modal fade custom-inspect-modal" id="userInspectModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 680px;">
+        <div class="modal-content position-relative">
+            <!-- ปุ่มปิดมุมบนขวา -->
+            <button type="button" class="btn-close position-absolute top-0 end-0 m-3" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+
+            <!-- User ID  -->
+            <div class="modal-user-title" id="modalUserId">User id : --</div>
+
+            <div class="row g-4">
+                <!--  ข้อมูลผู้ใช้งาน -->
+                <div class="col-6 user-info-text">
+                    <div>FirstName: <span id="modalFirstName">--</span></div>
+                    <div>LastName : <span id="modalLastName">--</span></div>
+                    <div>Role : <span id="modalRole">--</span></div>
+                    <div>Age : <span id="modalAge">--</span></div>
+                    <div>PhoneNumber : <span id="modalPhone">--</span></div>
+                    <div>Gender : <span id="modalGender">--</span></div>
+                    <div>Birthdate : <span id="modalBirthdate">--</span></div>
+                    <div>Create at : <span id="modalCreatedAt">--</span></div>
+                    <div class="mt-3">สถานะการใช้งาน <strong id="modalStatus">ปกติ</strong></div>
+                </div>
+
+                <!--  รายการประวัติคำสั่งซื้อ -->
+                <div class="col-6">
+                    <div class="order-history-title">Order History</div>
+                    <div class="order-history-box" id="modalOrderHistory">
+                        <div class="text-muted">กำลังโหลดข้อมูล...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!--  ระงับบัญชีและลบบัญชี -->
+            <div class="d-flex justify-content-end gap-3 mt-4 pt-2">
+                <button type="button" class="btn-suspend-account" id="btnToggleSuspend">ระงับบัญชี</button>
+    
+                <form id="deleteUserForm" method="post" asp-controller="Home" asp-action="DeleteUser" class="m-0 p-0">
+                    <input type="hidden" name="id" id="deleteUserId" value="0" />
+                    <button type="submit" id="btnDeleteUser" class="btn-delete-account"
+                            onclick="return confirm('ยืนยันที่จะลบผู้ใช้นี้ออกจากระบบหรือไม่?');">
+                        ลบบัญชี
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================== -->
+<!--  modal JavaScript 
+ ========================================== -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const inspectModalEl = document.getElementById('userInspectModal');
+        const inspectModal = new bootstrap.Modal(inspectModalEl);
+        let currentUserId = null;
+
+       
+        document.querySelectorAll('.btn-inspect').forEach(function (button) {
+            button.addEventListener('click', function (e) {
+                e.preventDefault(); 
+
+                
+                const row = this.closest('tr');
+                const userId = row.querySelector('td:first-child').innerText.trim();
+                currentUserId = userId;
+
+                
+                document.getElementById('deleteUserId').value = userId;
+
+                //รีเซ็ตข้อมูลแสดงผลระหว่างรอโหลด
+                document.getElementById('modalUserId').innerText = `User id : ${userId}`;
+                document.getElementById('modalFirstName').innerText = "กำลังโหลด...";
+                document.getElementById('modalLastName').innerText = "";
+                document.getElementById('modalRole').innerText = "-";
+                document.getElementById('modalAge').innerText = "-";
+                document.getElementById('modalPhone').innerText = "-";
+                document.getElementById('modalGender').innerText = "-";
+                document.getElementById('modalBirthdate').innerText = "-";
+                document.getElementById('modalCreatedAt').innerText = "-";
+                document.getElementById('modalOrderHistory').innerHTML = '<div class="text-white">กำลังโหลดข้อมูล...</div>';
+
+                //เปิด Modal
+                inspectModal.show();
+
+                // 5. ดึงข้อมูล UserและOrders
+                fetch(`/Home/GetUserDetailsJson?id=${userId}`)
+                    .then(response => {
+                        if (!response.ok) throw new Error("Network error");
+                        return response.json();
+                    })
+                    .then(data => {
+                        document.getElementById('modalFirstName').innerText = data.firstName || '-';
+                        document.getElementById('modalLastName').innerText = data.lastName || '-';
+                        document.getElementById('modalRole').innerText = data.roleName || '-';
+                        document.getElementById('modalAge').innerText = data.age || '-';
+                        document.getElementById('modalPhone').innerText = data.phoneNumber || '-';
+                        
+                        let genderText = 'อื่นๆ';
+                        if (data.gender === 'MALE' || data.gender === 'Male') genderText = 'ชาย';
+                        else if (data.gender === 'FEMALE' || data.gender === 'Female') genderText = 'หญิง';
+                        document.getElementById('modalGender').innerText = genderText;
+
+                        document.getElementById('modalBirthdate').innerText = data.birthDate || '-';
+                        document.getElementById('modalCreatedAt').innerText = data.createdAt || '-';
+                        
+                        const statusElem = document.getElementById('modalStatus');
+                        statusElem.innerText = data.isActive ? 'ปกติ' : 'ถูกระงับ';
+                        statusElem.style.color = data.isActive ? '#000' : '#d9534f';
+
+                        const suspendBtn = document.getElementById('btnToggleSuspend');
+                        suspendBtn.innerText = data.isActive ? 'ระงับบัญชี' : 'ยกเลิกระงับบัญชี';
+
+                        const historyContainer = document.getElementById('modalOrderHistory');
+                        if (data.orders && data.orders.length > 0) {
+                            historyContainer.innerHTML = data.orders.map(orderId => `<div>Order ID : ${orderId}</div>`).join('');
+                        } else {
+                            historyContainer.innerHTML = '<div class="text-white-50">ไม่มีประวัติการสั่งซื้อ</div>';
+                        }
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        document.getElementById('modalFirstName').innerText = "เกิดข้อผิดพลาดในการโหลด";
+                    });
+            });
+        });
+
+        // ปุ่มระงับบัญชี
+        document.getElementById('btnToggleSuspend').addEventListener('click', function () {
+            if (!currentUserId) return;
+            fetch(`/Home/ToggleSuspendUser?id=${currentUserId}`, { method: 'POST' })
+                .then(res => res.json())
+                .then(res => {
+                    if (res.success) {
+                        location.reload();
+                    }
+                });
+        });
+    });
+</script>

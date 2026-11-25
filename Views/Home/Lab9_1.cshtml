@@ -1,0 +1,28 @@
+@using Microsoft.AspNetCore.Http.Features
+@model IEnumerable<surawat_67_172467_L003.Models.Labstudent>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>StdID</th>
+            <th>Name</th>
+            <th>Lastname</th>
+            <th>Password</th>
+            <th></th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.StdId</td>
+                <td>@item.StdName</td>
+                <td>@item.StdLastname</td>
+                <td>@item.StdPassword</td>
+                <td><a asp-action="Lab10" asp-controller="Home" asp-route-StdId=@item.StdId>Edit</a></td>
+                <td><a asp-action="Lab10_1" asp-controller="Home" asp-route-StdId=@item.StdId>Delete</a></td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -1,0 +1,212 @@
+@model surawat_67_172467_L003.Models.Food
+@{
+    ViewData["Title"] = "รีวิวอาหาร";
+    Layout = "_Layout";
+}
+
+<style>
+    .madimi-one-regular {
+        font-family: "Madimi One", sans-serif;
+    }
+
+    body {
+        background-color: #fffaf5;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140' viewBox='0 0 140 140'%3E%3Cg fill='none' stroke='%23ff6600' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round' opacity='0.11'%3E%3Cpath d='M18 36h32c0 11-7 18-16 18s-16-7-16-18z'/%3E%3Cpath d='M22 30l24-6M22 25l24-3'/%3E%3Cpath d='M96 22l18 28-28 6z'/%3E%3Ccircle cx='98' cy='38' r='2'/%3E%3Ccircle cx='104' cy='44' r='1.5'/%3E%3Cpath d='M30 88h16l-2 24H32z'/%3E%3Cpath d='M28 88h20M38 88l5-10'/%3E%3Cpath d='M92 84v28M89 84v9c0 3 6 3 6 0v-9M106 84v28'/%3E%3Cellipse cx='106' cy='89' rx='3.5' ry='5'/%3E%3Ccircle cx='68' cy='24' r='2'/%3E%3Ccircle cx='66' cy='70' r='2.5'/%3E%3C/g%3E%3C/svg%3E");
+        background-repeat: repeat;
+        color: #222222;
+    }
+
+    .review-card {
+        background-color: #ffffff;
+        border: 1px solid #ffe4d1;
+        border-top: 6px solid #ff6600;
+        border-radius: 28px;
+        box-shadow: 0 12px 32px rgba(255, 102, 0, 0.1);
+        color: #222222;
+        max-width: 760px;
+        margin: 50px auto 90px auto;
+        padding: 40px 55px;
+    }
+
+    .review-title {
+        font-size: 32px;
+        font-weight: 800;
+        text-align: center;
+        margin-bottom: 25px;
+    }
+
+    .review-food-img-box {
+        width: 300px;
+        height: 200px;
+        background: linear-gradient(135deg, #ffe8d6, #ffd2b3);
+        border: 3px solid #ffe0c7;
+        margin: 0 auto 14px auto;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+        border-radius: 20px;
+    }
+
+    .review-food-img-box img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .star-rating {
+        display: flex;
+        justify-content: center;
+        gap: 14px;
+        font-size: 38px;
+        margin: 16px 0 8px 0;
+        cursor: pointer;
+    }
+
+    .star-icon {
+        color: #e0e0e0;
+        transition: transform 0.15s, color 0.15s;
+    }
+
+    .star-icon:hover {
+        transform: scale(1.18);
+    }
+
+    .star-icon.active {
+        color: #ff9800;
+    }
+
+    .review-textarea {
+        background-color: #fff8f2;
+        border: 1.5px solid #ffd5b8;
+        border-radius: 16px;
+        color: #222222;
+        padding: 14px 18px;
+        width: 100%;
+        max-width: 440px;
+        margin: 0 auto;
+        resize: none;
+        transition: 0.2s;
+    }
+
+    .review-textarea::placeholder {
+        color: #999999;
+        font-size: 13px;
+    }
+
+    .review-textarea:focus {
+        background-color: #ffffff;
+        border-color: #ff6600;
+        color: #222222;
+        outline: none;
+        box-shadow: 0 0 0 0.2rem rgba(255, 102, 0, 0.15);
+    }
+
+    .btn-submit-review {
+        background: linear-gradient(135deg, #ff6600, #e64a00);
+        color: #ffffff;
+        font-weight: bold;
+        border: none;
+        border-radius: 50px;
+        padding: 11px 36px;
+        font-size: 15px;
+        box-shadow: 0 5px 15px rgba(255, 102, 0, 0.3);
+        transition: 0.2s;
+    }
+
+    .btn-submit-review:hover {
+        background: linear-gradient(135deg, #e65c00, #cc3d00);
+        color: #ffffff;
+        transform: translateY(-2px);
+    }
+</style>
+
+<div class="review-card madimi-one-regular">
+    <div class="review-title">
+        <i class="bi bi-star-half me-2" style="color: #ff6600;"></i>รีวิวอาหาร
+    </div>
+
+    <!-- รูปภาพอาหารที่ดึงมาจากฐานข้อมูล -->
+    <div class="review-food-img-box shadow-sm">
+        @if (!string.IsNullOrEmpty(Model.ImageUrl))
+        {
+            <img src="@Model.ImageUrl" alt="@Model.Name" />
+        }
+        else
+        {
+            <div class="text-center" style="color: #ff6600;">
+                <i class="bi bi-cup-hot-fill fs-1 d-block"></i>
+                <span class="fw-bold small">รูปภาพอาหาร</span>
+            </div>
+        }
+    </div>
+    <div class="text-center fw-bold fs-4 mb-2 text-dark">@Model.Name</div>
+
+    <form asp-controller="Order" asp-action="SubmitReview" method="post">
+        <input type="hidden" name="orderId" value="@ViewBag.OrderId" />
+        <input type="hidden" name="foodId" value="@Model.Id" />
+        <input type="hidden" name="rating" id="ratingInput" value="5" />
+
+        <!-- แถบกดเลือกดาว 1-5 -->
+        <div class="star-rating" id="starContainer">
+            <i class="bi bi-star-fill star-icon active" data-value="1"></i>
+            <i class="bi bi-star-fill star-icon active" data-value="2"></i>
+            <i class="bi bi-star-fill star-icon active" data-value="3"></i>
+            <i class="bi bi-star-fill star-icon active" data-value="4"></i>
+            <i class="bi bi-star-fill star-icon active" data-value="5"></i>
+        </div>
+        <div id="ratingLabelText" class="text-center fw-bold mb-4" style="color: #ff6600; font-size: 14px;">
+            ยอดเยี่ยมมาก (5 ดาว)
+        </div>
+
+        <!-- ช่องข้อเสนอแนะ -->
+        <div class="text-center mb-4">
+            <label class="fw-bold d-block mb-2" style="font-size: 15px;">
+                <i class="bi bi-chat-left-text-fill me-1" style="color: #ff6600;"></i> ข้อเสนอแนะเพิ่มเติม
+            </label>
+            <textarea name="comment" rows="4" class="form-control review-textarea" placeholder="บอกเล่าความประทับใจในรสชาติหรือบริการที่นี่..."></textarea>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mt-4">
+            <a asp-controller="Order" asp-action="History" class="btn btn-outline-secondary rounded-pill px-4">
+                <i class="bi bi-arrow-left me-1"></i> ย้อนกลับ
+            </a>
+            <button type="submit" class="btn btn-submit-review">
+                <i class="bi bi-send-fill me-2"></i>ส่งความคิดเห็น
+            </button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        const stars = document.querySelectorAll('.star-icon');
+        const ratingInput = document.getElementById('ratingInput');
+        const ratingLabelText = document.getElementById('ratingLabelText');
+
+        const ratingDescriptions = {
+            1: "ควรปรับปรุง (1 ดาว)",
+            2: "พอใช้ได้ (2 ดาว)",
+            3: "ปานกลาง (3 ดาว)",
+            4: "อร่อยถูกใจ (4 ดาว)",
+            5: "ยอดเยี่ยมมาก (5 ดาว)"
+        };
+
+        stars.forEach(star => {
+            star.addEventListener('click', function () {
+                const selectedValue = parseInt(this.getAttribute('data-value'));
+                ratingInput.value = selectedValue;
+                ratingLabelText.innerText = ratingDescriptions[selectedValue] || "";
+
+                stars.forEach(s => {
+                    const starVal = parseInt(s.getAttribute('data-value'));
+                    if (starVal <= selectedValue) {
+                        s.classList.add('active');
+                    } else {
+                        s.classList.remove('active');
+                    }
+                });
+            });
+        });
+    </script>
+}

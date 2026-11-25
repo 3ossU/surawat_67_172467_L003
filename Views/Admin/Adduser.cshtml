@@ -1,0 +1,166 @@
+@{
+    ViewData["Title"] = "Add User";
+    Layout = "AdminLayout";
+}
+
+<style>
+    .madimi-one-regular {
+        font-family: "Madimi One", sans-serif;
+    }
+
+    body {
+        background-color: #fffaf5;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140' viewBox='0 0 140 140'%3E%3Cg fill='none' stroke='%23ff6600' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round' opacity='0.11'%3E%3Cpath d='M18 36h32c0 11-7 18-16 18s-16-7-16-18z'/%3E%3Cpath d='M22 30l24-6M22 25l24-3'/%3E%3Cpath d='M96 22l18 28-28 6z'/%3E%3Ccircle cx='98' cy='38' r='2'/%3E%3Ccircle cx='104' cy='44' r='1.5'/%3E%3Cpath d='M30 88h16l-2 24H32z'/%3E%3Cpath d='M28 88h20M38 88l5-10'/%3E%3Cpath d='M92 84v28M89 84v9c0 3 6 3 6 0v-9M106 84v28'/%3E%3Cellipse cx='106' cy='89' rx='3.5' ry='5'/%3E%3Ccircle cx='68' cy='24' r='2'/%3E%3Ccircle cx='66' cy='70' r='2.5'/%3E%3C/g%3E%3C/svg%3E");
+        background-repeat: repeat;
+        color: #222222;
+    }
+
+    .add-user-card {
+        background-color: #ffffff;
+        border: 1px solid #ffe4d1;
+        border-top: 6px solid #ff6600;
+        border-radius: 28px;
+        box-shadow: 0 12px 32px rgba(255, 102, 0, 0.1);
+        max-width: 560px;
+        width: 100%;
+        padding: 40px 44px;
+    }
+
+    .user-input {
+        background-color: #fff8f2;
+        border: 1.5px solid #ffd5b8;
+        color: #222222;
+        transition: 0.2s;
+    }
+
+    .user-input:focus {
+        background-color: #ffffff;
+        border-color: #ff6600;
+        color: #222222;
+        box-shadow: 0 0 0 0.2rem rgba(255, 102, 0, 0.15);
+    }
+
+    .btn-submit-custom {
+        background: linear-gradient(135deg, #ff6600, #e64a00);
+        color: #ffffff;
+        border: none;
+        box-shadow: 0 6px 16px rgba(255, 102, 0, 0.3);
+        transition: all 0.2s ease;
+    }
+
+    .btn-submit-custom:hover {
+        background: linear-gradient(135deg, #e65c00, #cc3d00);
+        color: #ffffff;
+        transform: translateY(-2px);
+    }
+
+    .form-check-input:checked {
+        background-color: #ff6600;
+        border-color: #ff6600;
+    }
+
+    .form-check-input,
+    .form-select {
+        cursor: pointer;
+    }
+</style>
+
+<div class="d-flex justify-content-center align-items-center min-vh-100 py-4 px-3 madimi-one-regular">
+    <div class="add-user-card">
+        <div class="text-center fs-2 fw-bold mb-1 text-dark">
+            <i class="bi bi-person-plus-fill me-2" style="color: #ff6600;"></i>เพิ่มผู้ใช้งานใหม่
+        </div>
+        <p class="text-center text-muted small mb-4">กรอกข้อมูลสำหรับสร้างบัญชีผู้ใช้งานในระบบ</p>
+
+        @if (ViewBag.Status != null)
+        {
+            <div class="alert alert-danger py-2 mb-3 text-center" style="font-size: 14px; border-radius: 20px;">
+                <i class="bi bi-exclamation-circle-fill me-1"></i> @ViewBag.Status
+            </div>
+        }
+
+        <form asp-controller="Admin" asp-action="Adduser" method="post">
+            <!-- เพศ -->
+            <div class="mb-3 p-3 rounded-4" style="background-color: #fffaf5; border: 1px solid #ffe4d1;">
+                <label class="form-label fw-bold mb-2 d-block" style="font-size: 14px; color: #ff6600;">
+                    <i class="bi bi-gender-ambiguous me-1"></i> เพศ
+                </label>
+                <div class="d-flex gap-4">
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="Gender" id="genderMale" value="Male" checked>
+                        <label class="form-check-label ms-1 fw-bold" for="genderMale"
+                               style="font-size: 15px;">ชาย</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="Gender" id="genderFemale" value="Female">
+                        <label class="form-check-label ms-1 fw-bold" for="genderFemale"
+                               style="font-size: 15px;">หญิง</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="Gender" id="genderOther" value="Other">
+                        <label class="form-check-label ms-1 fw-bold" for="genderOther"
+                               style="font-size: 15px;">อื่นๆ</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ชื่อ และ นามสกุล -->
+            <div class="row g-3 mb-3">
+                <div class="col-6">
+                    <label class="form-label fw-bold mb-1" style="font-size: 14px;">ชื่อ</label>
+                    <input type="text" name="FirstName" class="form-control rounded-pill user-input px-3 py-2"
+                           placeholder="กรอกชื่อจริง" required />
+                </div>
+                <div class="col-6">
+                    <label class="form-label fw-bold mb-1" style="font-size: 14px;">นามสกุล</label>
+                    <input type="text" name="LastName" class="form-control rounded-pill user-input px-3 py-2"
+                           placeholder="กรอกนามสกุล" required />
+                </div>
+            </div>
+
+            <!-- เบอร์โทร และ วันเกิด -->
+            <div class="row g-3 mb-3">
+                <div class="col-6">
+                    <label class="form-label fw-bold mb-1" style="font-size: 14px;">เบอร์โทร</label>
+                    <input type="tel" name="PhoneNumber" class="form-control rounded-pill user-input px-3 py-2"
+                           placeholder="0xxxxxxxxx" maxlength="10" pattern="[0-9]{10}" inputmode="numeric"
+                           oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);" required />
+                </div>
+                <div class="col-6">
+                    <label class="form-label fw-bold mb-1" style="font-size: 14px;">วันเกิด</label>
+                    <input type="date" name="BirthDate" class="form-control rounded-pill user-input px-3 py-2"
+                           required />
+                </div>
+            </div>
+
+            <!-- รหัสผ่าน -->
+            <div class="mb-3 text-start">
+                <label class="form-label fw-bold mb-1" style="font-size: 14px;">รหัสผ่าน</label>
+                <input type="password" name="Password" class="form-control rounded-pill user-input px-3 py-2"
+                       placeholder="กรุณากรอกรหัสผ่าน" required />
+            </div>
+
+            <!-- บทบาท -->
+            <div class="mb-4 text-start">
+                <label class="form-label fw-bold mb-1" style="font-size: 14px;">บทบาท</label>
+                <select name="Role" class="form-select rounded-pill user-input px-3 py-2" required>
+                    <option value="" disabled selected>-- เลือกบทบาทผู้ใช้งาน --</option>
+                    <option value="Customer">Customer (ลูกค้าทั่วไป)</option>
+                    <option value="Manager">Manager (ผู้จัดการร้าน)</option>
+                    <option value="Chef">Chef (พ่อครัว)</option>
+                    <option value="Delivery">Delivery (พนักงานส่งอาหาร)</option>
+                    <option value="Waiter">Waiter (พนักงานบริการ)</option>
+                    <option value="Finance">Finance (พนักงานการเงิน)</option>
+                </select>
+            </div>
+
+            <!-- ปุ่มบันทึก -->
+            <div class="text-center mt-4">
+                <button type="submit" class="btn btn-submit-custom rounded-pill fw-bold px-5 py-2"
+                        style="min-width: 220px;">
+                    <i class="bi bi-check-circle-fill me-2"></i>เพิ่มผู้ใช้
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

@@ -1,0 +1,133 @@
+
+@{
+    ViewData["Title"] = "adminLayout";
+    Layout = "AdminLayout"; // ปรับชื่อ Layout ตามโปรเจกต์ของคุณ
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4 fw-bold text-dark">Dashboard</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item active">ภาพรวมระบบและสถิติร้านอาหาร</li>
+    </ol>
+
+    <!-- การ์ดแสดงสถิติต่างๆ -->
+    <div class="row">
+        <!-- จำนวน User ที่ออนไลน์อยู่ -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2 bordear-0 border-start border-primary border-4">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                User ออนไลน์
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">24 คน</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-person-fill-check fs-2 text-primary"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- จำนวนลูกค้าทานที่ร้าน -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2 border-0 border-start border-success border-4">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                ลูกค้าทานที่ร้าน (โต๊ะ)
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">12 โต๊ะ</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-shop fs-2 text-success"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- จำนวนลูกค้าที่สั่งทานที่บ้าน -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2 border-0 border-start border-warning border-4">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                ลูกค้าสั่งทานที่บ้าน (Delivery)
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">8 ออเดอร์</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-bag-heart-fill fs-2 text-warning"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- รายได้ที่ได้ในเดือนนี้ -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-danger shadow h-100 py-2 border-0 border-start border-danger border-4">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                รายได้เดือนนี้
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">฿145,850</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-currency-dollar fs-2 text-danger"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ส่วนตารางหรือกราฟเพิ่มเติมด้านล่าง -->
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="card mb-4 shadow-sm border-0">
+                <div class="card-header bg-white fw-bold">
+                    <i class="bi bi-clock-history me-1"></i> รายการออเดอร์ล่าสุด
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>#Order ID</th>
+                                    <th>ประเภทลูกค้า</th>
+                                    <th>รายการอาหาร</th>
+                                    <th>ยอดรวม</th>
+                                    <th>สถานะ</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>#ORD-001</td>
+                                    <td>ทานที่ร้าน (โต๊ะ 05)</td>
+                                    <td>ข้าวผัดปู, ต้มยำกุ้ง</td>
+                                    <td>฿350</td>
+                                    <td><span class="badge bg-success">เสิร์ฟแล้ว</span></td>
+                                </tr>
+                                <tr>
+                                    <td>#ORD-002</td>
+                                    <td>ทานที่บ้าน</td>
+                                    <td>ส้มตำไทย, ไก่ย่าง</td>
+                                    <td>฿220</td>
+                                    <td><span class="badge bg-warning text-dark">กำลังจัดส่ง</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

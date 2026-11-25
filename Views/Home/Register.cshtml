@@ -1,0 +1,146 @@
+@model surawat_67_172467_L003.ViewModels.RegisterViewModel
+@{
+    ViewData["Title"] = "Create Account";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+
+    <!-- 1. เรียกใช้ Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+    <!-- 2. เรียกใช้ Google Fonts: Madimi One -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Madimi+One&display=swap" rel="stylesheet">
+
+    <style>
+            .madimi-one-regular {
+                font-family: "Madimi One", sans-serif;
+                font-weight: 400;
+                font-style: normal;
+            }
+
+            /* จัดการพื้นหลัง: ค่าเริ่มต้นเป็นสีขาว/เทา พร้อมใส่รูปภาพพื้นหลัง */
+            body {
+                background-color: #585858;
+                background-image: url('https://files.vogue.co.th/uploads/Hatyai-Chicken_.webp');
+                /* ใส่ URL หรือ Path รูปภาพที่นี่ */
+                background-size: cover;
+                background-position: center;
+                background-repeat: no-repeat;
+            }
+
+            .text-shadow-custom {
+                text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+            }
+
+            /* ปุ่มสมัครสมาชิกสีขาวโปร่งแสงตามแบบ */
+            .btn-register-custom {
+                background-color: rgba(255, 255, 255, 0.7);
+                color: #333;
+                transition: all 0.2s ease;
+            }
+
+            .btn-register-custom:hover {
+                background-color: rgba(255, 255, 255, 0.9);
+                color: #111;
+            }
+
+            /* ปรับแต่ง Radio ให้เป็นสีขาว */
+            .form-check-input:checked {
+                background-color: #ffffff;
+                border-color: #ffffff;
+            }
+
+            .form-check-input {
+                cursor: pointer;
+            }
+    </style>
+</head>
+
+<body class="d-flex justify-content-center align-items-center vh-100 madimi-one-regular">
+
+    <div class="w-100 text-white p-4 text-shadow-custom" style="max-width: 520px;">
+
+        <!-- หัวข้อ Create Account -->
+        <div class="text-center fs-2 mb-4">Create Account</div>
+
+        <!-- ฟอร์มส่งไปยัง Controller Home และ Action Register -->
+        <form asp-action="Register" asp-controller="Home">
+
+            <!-- ส่วนเลือกเพศ -->
+            <div class="d-flex gap-4 mb-3">
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" asp-for="Gender" id="genderMale" value="Male" checked>
+                    <label class="form-check-label ms-1" for="genderMale" style="font-size: 15px;">ชาย</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" asp-for="Gender" id="genderFemale" value="Female">
+                    <label class="form-check-label ms-1" for="genderFemale" style="font-size: 15px;">หญิง</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" asp-for="Gender" id="genderOther" value="Other">
+                    <label class="form-check-label ms-1" for="genderOther" style="font-size: 15px;">อื่นๆ</label>
+                </div>
+            </div>
+
+            <!-- ชื่อ - นามสกุล -->
+            <div class="row g-3 mb-3">
+                <div class="col-6">
+                    <label class="form-label mb-1" style="font-size: 14px;">ชื่อ</label>
+                    <input asp-for="Name" type="text" class="form-control rounded-pill bg-light border-0 px-3 py-2"
+                           placeholder="firstname" required />
+                </div>
+                <div class="col-6">
+                    <label class="form-label mb-1" style="font-size: 14px;">นามสกุล</label>
+                    <input asp-for="Lastname" type="text" class="form-control rounded-pill bg-light border-0 px-3 py-2"
+                           placeholder="lastname" required />
+                </div>
+            </div>
+
+            <!-- เบอร์โทร - วันเกิด -->
+            <div class="row g-3 mb-3">
+                <div class="col-6">
+                    <label class="form-label mb-1" style="font-size: 14px;">เบอร์โทร</label>
+                    <input asp-for="Phone" type="tel" class="form-control rounded-pill bg-light border-0 px-3 py-2"
+                           placeholder="0xxxxxxxxx" maxlength="10" pattern="[0-9]{10}" inputmode="numeric"
+                           oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);" required />
+                </div>
+                <div class="col-6">
+                    <label class="form-label mb-1" style="font-size: 14px;">วันเกิด</label>
+                    <input asp-for="Birthdate" type="date"
+                           class="form-control rounded-pill bg-light border-0 px-3 py-2 text-secondary" required />
+                </div>
+            </div>
+
+            <!-- รหัสผ่าน -->
+            <div class="mb-4">
+                <label class="form-label mb-1" style="font-size: 14px;">รหัสผ่าน</label>
+                <input asp-for="Password" type="password" class="form-control rounded-pill bg-light border-0 px-3 py-2"
+                       placeholder="password" required />
+            </div>
+
+            <!-- ปุ่ม Submit -->
+            <div class="text-center mt-4">
+                <button type="submit" class="btn btn-register-custom rounded-pill fw-bold px-5 py-2"
+                        style="min-width: 200px;">
+                    สมัครบัญชี
+                </button>
+            </div>
+
+        </form>
+
+    </div>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

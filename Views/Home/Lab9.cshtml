@@ -1,0 +1,16 @@
+@model surawat_67_172467_L003.Models.Labstudent
+
+@if (ViewBag.Status != null)
+{
+    <div style="color: red; font-weight: bold; margin-bottom: 10px;">
+        @ViewBag.Status
+    </div>
+}
+
+<form asp-action="Lab9" asp-controller="Home" method="post">
+    Student ID <input type="text" asp-for="StdId" class="form-control" /><br />
+    Password <input type="password" asp-for="StdPassword" class="form-control" /><br />
+    Name <input type="text" asp-for="StdName" class="form-control" /><br />
+    Lastname <input type="text" asp-for="StdLastname" class="form-control" /><br />
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>

@@ -1,0 +1,481 @@
+@model IEnumerable<surawat_67_172467_L003.Models.Order>
+@{
+    ViewData["Title"] = "จัดการคำสั่งซื้อ";
+    Layout = "AdminLayout";
+    int currentRoleId = ViewBag.RoleId ?? (Context.Session.GetInt32("RoleId") ?? 0);
+}
+
+<style>
+    .madimi-one-regular {
+        font-family: "Madimi One", sans-serif;
+    }
+
+    body {
+        background-color: #fffaf5;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140' viewBox='0 0 140 140'%3E%3Cg fill='none' stroke='%23ff6600' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round' opacity='0.11'%3E%3Cpath d='M18 36h32c0 11-7 18-16 18s-16-7-16-18z'/%3E%3Cpath d='M22 30l24-6M22 25l24-3'/%3E%3Cpath d='M96 22l18 28-28 6z'/%3E%3Ccircle cx='98' cy='38' r='2'/%3E%3Ccircle cx='104' cy='44' r='1.5'/%3E%3Cpath d='M30 88h16l-2 24H32z'/%3E%3Cpath d='M28 88h20M38 88l5-10'/%3E%3Cpath d='M92 84v28M89 84v9c0 3 6 3 6 0v-9M106 84v28'/%3E%3Cellipse cx='106' cy='89' rx='3.5' ry='5'/%3E%3Ccircle cx='68' cy='24' r='2'/%3E%3Ccircle cx='66' cy='70' r='2.5'/%3E%3C/g%3E%3C/svg%3E");
+        background-repeat: repeat;
+        color: #222222;
+    }
+
+    .search-container {
+        max-width: 460px;
+    }
+
+    .search-input {
+        background-color: #ffffff;
+        border: 1.5px solid #ffd5b8;
+        color: #222222;
+    }
+
+    .search-input:focus {
+        background-color: #ffffff;
+        border-color: #ff6600;
+        box-shadow: 0 0 0 0.2rem rgba(255, 102, 0, 0.15);
+    }
+
+    .table-wrapper {
+        background-color: #ffffff;
+        border: 1px solid #ffe4d1;
+        border-radius: 20px;
+        box-shadow: 0 10px 28px rgba(255, 102, 0, 0.08);
+        overflow: hidden;
+    }
+
+    .custom-table thead th {
+        background-color: #ff6600;
+        color: #ffffff;
+        border: none;
+        padding: 14px 20px;
+        font-weight: bold;
+    }
+
+    .custom-table tbody tr:nth-of-type(odd) {
+        background-color: #ffffff;
+    }
+
+    .custom-table tbody tr:nth-of-type(even) {
+        background-color: #fff8f2;
+    }
+
+    .custom-table tbody tr:hover {
+        background-color: #ffefe3;
+    }
+
+    .custom-table td {
+        padding: 13px 20px;
+        border-bottom: 1px solid #ffefe3;
+        color: #222222;
+    }
+
+    .btn-inspect {
+        background-color: #fff0e3;
+        color: #ff6600;
+        border: 1px solid #ffd5b8;
+        border-radius: 50px;
+        padding: 5px 16px;
+        font-size: 13px;
+        font-weight: bold;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    .btn-inspect:hover {
+        background-color: #ff6600;
+        color: #ffffff;
+    }
+
+    .custom-order-modal .modal-content {
+        background-color: #fffaf5;
+        border: 1px solid #ffe4d1;
+        border-top: 6px solid #ff6600;
+        border-radius: 24px;
+        padding: 28px 34px;
+        box-shadow: 0 14px 36px rgba(0, 0, 0, 0.2);
+        color: #222222;
+    }
+
+    .modal-order-header {
+        border-bottom: 1.5px solid #ffd5b8;
+        padding-bottom: 14px;
+        margin-bottom: 18px;
+    }
+
+    .order-meta-box {
+        background-color: #ffffff;
+        border: 1px solid #ffe4d1;
+        border-radius: 14px;
+        padding: 14px 18px;
+        font-size: 14px;
+    }
+
+    .order-items-box {
+        background-color: #ffffff;
+        border: 1px solid #ffe4d1;
+        border-radius: 14px;
+        padding: 14px 18px;
+        max-height: 210px;
+        overflow-y: auto;
+    }
+
+    .btn-cancel-order {
+        background-color: #fff0e3;
+        color: #dc3545;
+        border: 1px solid #ffd5b8;
+        border-radius: 50px;
+        padding: 9px 22px;
+        font-size: 14px;
+        font-weight: bold;
+        transition: 0.2s;
+    }
+
+    .btn-cancel-order:hover {
+        background-color: #dc3545;
+        color: #ffffff;
+    }
+
+    .btn-next-status {
+        background: linear-gradient(135deg, #ff6600, #e64a00);
+        color: #ffffff;
+        border: none;
+        border-radius: 50px;
+        padding: 9px 26px;
+        font-size: 14px;
+        font-weight: bold;
+        box-shadow: 0 4px 12px rgba(255, 102, 0, 0.3);
+        transition: 0.2s;
+    }
+
+    .btn-next-status:hover {
+        background: linear-gradient(135deg, #e65c00, #cc3d00);
+        color: #ffffff;
+    }
+</style>
+
+<div class="d-flex justify-content-center align-items-center py-4 madimi-one-regular">
+    <div class="container" style="max-width: 920px;">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+            <div>
+                <h3 class="text-dark fw-bold m-0">
+                    <i class="bi bi-bag-check-fill me-2" style="color: #ff6600;"></i>รายการคำสั่งซื้อ
+                </h3>
+                <small class="text-muted">ติดตามสถานะการเตรียมอาหารและการจัดส่งทั้งหมด</small>
+            </div>
+
+            <div class="search-container w-100 position-relative">
+                <input type="text"
+                       id="liveSearchOrder"
+                       class="form-control rounded-pill search-input px-4 py-2 pe-5"
+                       placeholder="พิมพ์เพื่อค้นหา เลขคำสั่งซื้อ, ชื่อผู้สั่ง, สถานะ..."
+                       autocomplete="off" />
+                <span class="position-absolute end-0 top-50 translate-middle-y me-3 pe-none" style="color: #ff6600;">
+                    <i class="bi bi-search fs-5"></i>
+                </span>
+            </div>
+        </div>
+
+        <!-- ตารางข้อมูลคำสั่งซื้อ -->
+        <div class="table-responsive table-wrapper">
+            <table class="table custom-table align-middle m-0">
+                <thead>
+                    <tr>
+                        <th scope="col" style="width: 24%; text-align: center;">รหัสคำสั่งซื้อ</th>
+                        <th scope="col" style="width: 31%;">สั่งโดย</th>
+                        <th scope="col" style="width: 25%; text-align: center;">สถานะ</th>
+                        <th scope="col" style="width: 20%; text-align: center;">จัดการ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        @foreach (var item in Model)
+                        {
+                            var customerName = item.User != null
+                                ? $"{item.User.FirstName} {item.User.LastName}"
+                                : "ลูกค้าทั่วไป";
+
+                            var statusLabel = item.Status switch
+                            {
+                                "PENDING" => "รับออเดอร์แล้ว",
+                                "PREPARING" => "กำลังเตรียมอาหาร",
+                                "ON_DELIVERY" => "กำลังจัดส่ง",
+                                "COMPLETED" => "จัดส่งสำเร็จ",
+                                "CANCELLED" => "ยกเลิกรายการ",
+                                _ => item.Status
+                            };
+
+                            var badgeClass = item.Status switch
+                            {
+                                "COMPLETED" => "bg-success",
+                                "CANCELLED" => "bg-danger",
+                                "ON_DELIVERY" => "bg-primary",
+                                "PREPARING" => "bg-warning text-dark",
+                                _ => "bg-secondary"
+                            };
+
+                            <tr class="order-row" data-search="@($"{item.Id} {item.OrderNumber} {customerName} {item.Status} {statusLabel}".ToLower())">
+                                <td class="text-center fw-bold" style="color: #ff6600;">@item.OrderNumber</td>
+                                <td class="fw-bold">@customerName</td>
+                                <td class="text-center">
+                                    <span class="badge @badgeClass rounded-pill px-3 py-1" style="font-size: 12px;">
+                                        @statusLabel
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    <button type="button" class="btn-inspect" data-id="@item.Id">
+                                        ตรวจสอบ <i class="bi bi-search"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    }
+
+                    <tr id="noOrderRow" style="@(Model != null && Model.Any() ? "display: none;" : "")">
+                        <td colspan="4" class="text-center text-muted py-4">
+                            ไม่พบรายการคำสั่งซื้อ
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- ================= หน้าต่างตรวจสอบรายละเอียดคำสั่งซื้อ ================= -->
+<div class="modal fade custom-order-modal madimi-one-regular" id="orderInspectModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 640px;">
+        <div class="modal-content position-relative">
+            <button type="button" class="btn-close position-absolute top-0 end-0 m-3" data-bs-dismiss="modal" aria-label="Close"></button>
+
+            <div class="modal-order-header">
+                <div class="d-flex align-items-center gap-2 mb-1">
+                    <h4 class="fw-bold m-0" id="mOrderNumber">รหัสคำสั่งซื้อ : --</h4>
+                    <span class="badge rounded-pill" style="background-color: #ff6600;" id="mOrderTypeBadge">จัดส่งถึงบ้าน</span>
+                </div>
+                <div class="text-muted" style="font-size: 13px;">
+                    สั่งโดย : <strong class="text-dark" id="mCustomerName">--</strong>
+                    <span class="mx-2">|</span>
+                    เวลาสั่ง : <span id="mCreatedAt">--</span>
+                </div>
+            </div>
+
+            <div class="order-meta-box mb-3">
+                <div class="mb-1">
+                    <i class="bi bi-geo-alt-fill me-1" style="color: #ff6600;"></i>
+                    <strong>ที่อยู่จัดส่ง / โต๊ะ :</strong> <span id="mAddress">--</span>
+                </div>
+                <div class="mb-1">
+                    <i class="bi bi-chat-left-text-fill text-secondary me-1"></i>
+                    <strong>หมายเหตุ :</strong> <span id="mNotes">-</span>
+                </div>
+                <div id="mUtensils" class="text-muted" style="font-size: 12px;"></div>
+            </div>
+
+            <div class="order-items-box mb-3">
+                <div class="d-flex justify-content-between fw-bold border-bottom pb-2 mb-2" style="font-size: 14px; color: #ff6600;">
+                    <span>รายการอาหาร</span>
+                    <div class="d-flex gap-4">
+                        <span>จำนวน</span>
+                        <span style="min-width: 70px; text-align: right;">ราคา</span>
+                    </div>
+                </div>
+                <div id="mItemsList" class="d-flex flex-column gap-2" style="font-size: 14px;">
+                    <div class="text-muted text-center py-3">กำลังโหลดรายการ...</div>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center bg-white rounded-4 px-3 py-2 mb-4 border" style="border-color: #ffe4d1 !important;">
+                <div>
+                    <span class="text-muted" style="font-size: 13px;">สถานะปัจจุบัน : </span>
+                    <strong class="fs-6" id="mCurrentStatusText">--</strong>
+                </div>
+                <div class="text-end">
+                    <span class="text-muted" style="font-size: 13px;">ยอดรวมสุทธิ : </span>
+                    <strong class="fs-5 text-success" id="mTotalAmount">0 บาท</strong>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-end flex-wrap gap-2">
+                <!-- ปุ่มยกเลิกรายการ (แสดงเฉพาะ Admin) -->
+                <div>
+                    <button type="button" class="btn-cancel-order" id="btnCancelOrder" style="display: none;">
+                        <i class="bi bi-x-circle me-1"></i> ยกเลิกรายการ
+                    </button>
+                </div>
+
+                <!-- ปุ่มอัปเดตสถานะตามสิทธิ์ของแต่ละตำแหน่ง -->
+                <div class="text-end" id="nextStatusWrapper">
+                    <div class="text-muted fw-bold mb-1" id="nextStatusLabel" style="font-size: 12px;">อัปเดตสถานะ</div>
+                    <button type="button" class="btn-next-status" id="btnNextStatus">
+                        อัปเดตสถานะ
+                    </button>
+                </div>
+
+                <!-- ข้อความแจ้งเตือนกรณีไม่ใช่ขั้นตอนของตำแหน่งนี้ -->
+                <div class="text-end text-muted small fw-bold" id="roleWaitHint" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const currentRoleId = @currentRoleId; // 2=Admin, 4=Chef, 5=Delivery
+
+        const searchInput = document.getElementById('liveSearchOrder');
+        const orderRows = document.querySelectorAll('.order-row');
+        const noOrderRow = document.getElementById('noOrderRow');
+
+        searchInput.addEventListener('input', function () {
+            const keyword = this.value.trim().toLowerCase();
+            let visibleCount = 0;
+
+            orderRows.forEach(row => {
+                const text = row.getAttribute('data-search') || '';
+                if (text.includes(keyword)) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            if (noOrderRow) {
+                noOrderRow.style.display = visibleCount === 0 ? '' : 'none';
+            }
+        });
+
+        const orderModal = new bootstrap.Modal(document.getElementById('orderInspectModal'));
+        let currentOrderId = null;
+        let nextStatusCode = null;
+
+        const statusDisplayMap = {
+            "PENDING": "รับออเดอร์แล้ว (รอเตรียมอาหาร)",
+            "PREPARING": "กำลังเตรียมอาหาร",
+            "ON_DELIVERY": "กำลังจัดส่ง (อยู่กับคนขับ)",
+            "COMPLETED": "จัดส่งสำเร็จ",
+            "CANCELLED": "ยกเลิกรายการแล้ว"
+        };
+
+        document.querySelectorAll('.btn-inspect').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const orderId = this.getAttribute('data-id');
+                currentOrderId = orderId;
+
+                document.getElementById('mItemsList').innerHTML = '<div class="text-muted text-center py-3">กำลังโหลดข้อมูล...</div>';
+                orderModal.show();
+
+                fetch(`/Admin/GetOrderDetailsJson?id=${orderId}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        document.getElementById('mOrderNumber').innerText = `รหัสคำสั่งซื้อ : ${data.orderNumber}`;
+                        document.getElementById('mOrderTypeBadge').innerText = data.orderType === 'DINE_IN' ? `ทานที่ร้าน (โต๊ะ ${data.tableNumber})` : 'จัดส่งถึงบ้าน';
+                        document.getElementById('mCustomerName').innerText = `${data.customerName} (${data.phoneNumber})`;
+                        document.getElementById('mCreatedAt').innerText = data.createdAt;
+                        document.getElementById('mAddress').innerText = data.orderType === 'DINE_IN' ? `โต๊ะ ${data.tableNumber}` : data.deliveryAddress;
+                        document.getElementById('mNotes').innerText = data.notes;
+
+                        let utensils = [];
+                        if (data.needCutlery) utensils.push("รับช้อนส้อม");
+                        if (data.needSauce) utensils.push("รับซอส/เครื่องปรุง");
+                        document.getElementById('mUtensils').innerText = utensils.length > 0 ? `เพิ่มเติม: ${utensils.join(', ')}` : '';
+
+                        const itemsContainer = document.getElementById('mItemsList');
+                        if (data.items && data.items.length > 0) {
+                            itemsContainer.innerHTML = data.items.map(item => `
+                                <div class="d-flex justify-content-between align-items-center border-bottom pb-1">
+                                    <span>${item.foodName}</span>
+                                    <div class="d-flex gap-4">
+                                        <span class="fw-bold">x ${item.quantity}</span>
+                                        <span style="min-width: 70px; text-align: right;">${Number(item.subtotal).toLocaleString()} บาท</span>
+                                    </div>
+                                </div>
+                            `).join('');
+                        } else {
+                            itemsContainer.innerHTML = '<div class="text-muted text-center">ไม่มีรายการอาหาร</div>';
+                        }
+
+                        document.getElementById('mTotalAmount').innerText = `${Number(data.totalAmount).toLocaleString()} บาท`;
+                        document.getElementById('mCurrentStatusText').innerText = statusDisplayMap[data.status] || data.status;
+
+                        const btnCancel = document.getElementById('btnCancelOrder');
+                        const nextWrapper = document.getElementById('nextStatusWrapper');
+                        const btnNext = document.getElementById('btnNextStatus');
+                        const roleWaitHint = document.getElementById('roleWaitHint');
+
+                        // รีเซ็ตการแสดงผลปุ่ม
+                        btnCancel.style.display = 'none';
+                        nextWrapper.style.display = 'none';
+                        roleWaitHint.style.display = 'none';
+                        nextStatusCode = null;
+
+                        if (data.status === 'COMPLETED' || data.status === 'CANCELLED') {
+                            return;
+                        }
+
+                        // สิทธิ์ปุ่มยกเลิกรายการ: ให้เฉพาะ Admin (2) เท่านั้น
+                        if (currentRoleId === 2) {
+                            btnCancel.style.display = 'inline-block';
+                        }
+
+                        // กำหนดปุ่มอัปเดตสถานะตามตำแหน่งงาน (2=Admin, 4=Chef, 5=Delivery)
+                        if (data.status === 'PENDING') {
+                            if (currentRoleId === 4 || currentRoleId === 2) {
+                                nextStatusCode = 'PREPARING';
+                                btnNext.innerHTML = '<i class="bi bi-fire me-1"></i> เริ่มทำอาหาร';
+                                nextWrapper.style.display = 'block';
+                            } else if (currentRoleId === 5) {
+                                roleWaitHint.innerHTML = '<i class="bi bi-hourglass-split me-1"></i> รอห้องครัวดำเนินการเตรียมอาหาร';
+                                roleWaitHint.style.display = 'block';
+                            }
+                        } else if (data.status === 'PREPARING') {
+                            if (currentRoleId === 4 || currentRoleId === 2) {
+                                nextStatusCode = 'ON_DELIVERY';
+                                btnNext.innerHTML = '<i class="bi bi-bicycle me-1"></i> ส่งอาหารให้คนขับ';
+                                nextWrapper.style.display = 'block';
+                            } else if (currentRoleId === 5) {
+                                roleWaitHint.innerHTML = '<i class="bi bi-hourglass-split me-1"></i> ห้องครัวกำลังทำอาหาร รอส่งมอบ';
+                                roleWaitHint.style.display = 'block';
+                            }
+                        } else if (data.status === 'ON_DELIVERY') {
+                            if (currentRoleId === 5 || currentRoleId === 2) {
+                                nextStatusCode = 'COMPLETED';
+                                btnNext.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i> ยืนยันจัดส่งสำเร็จ';
+                                nextWrapper.style.display = 'block';
+                            } else if (currentRoleId === 4) {
+                                roleWaitHint.innerHTML = '<i class="bi bi-check2-circle text-success me-1"></i> ส่งมอบอาหารให้คนขับเรียบร้อยแล้ว';
+                                roleWaitHint.style.display = 'block';
+                            }
+                        }
+                    });
+            });
+        });
+
+        document.getElementById('btnNextStatus').addEventListener('click', function () {
+            if (!currentOrderId || !nextStatusCode) return;
+            updateOrderStatus(currentOrderId, nextStatusCode);
+        });
+
+        document.getElementById('btnCancelOrder').addEventListener('click', function () {
+            if (!currentOrderId) return;
+            if (confirm('ยืนยันที่จะยกเลิกคำสั่งซื้อนี้หรือไม่?')) {
+                updateOrderStatus(currentOrderId, 'CANCELLED');
+            }
+        });
+
+        function updateOrderStatus(orderId, status) {
+            fetch(`/Admin/UpdateOrderStatus?id=${orderId}&status=${status}`, { method: 'POST' })
+                .then(res => res.json())
+                .then(res => {
+                    if (res.success) {
+                        location.reload();
+                    } else {
+                        alert(res.message || 'เกิดข้อผิดพลาด');
+                    }
+                });
+        }
+    });
+</script>

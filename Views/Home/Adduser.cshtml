@@ -1,0 +1,126 @@
+@{
+    ViewData["Title"] = "Adduser";
+    Layout = "AdminLayout"; // ปรับชื่อ Layout ตามโปรเจกต์ของคุณ
+}
+
+<style>
+    .text-shadow-custom {
+        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+    }
+
+    .btn-submit-custom {
+        background-color: rgba(255, 255, 255, 0.7);
+        color: #333;
+        transition: all 0.2s ease;
+    }
+
+    .btn-submit-custom:hover {
+        background-color: rgba(255, 255, 255, 0.9);
+        color: #111;
+    }
+
+    .form-check-input:checked {
+        background-color: #ffffff;
+        border-color: #ffffff;
+    }
+
+    .form-check-input {
+        cursor: pointer;
+    }
+
+    .form-select {
+        cursor: pointer;
+    }
+</style>
+
+<!-- คอนเทนเนอร์จัดกึ่งกลางหน้าจอแบบเต็มความสูง -->
+<div class="d-flex justify-content-center align-items-center min-vh-100 py-4">
+    <div class="w-100 text-white p-4 text-shadow-custom" style="max-width: 520px;">
+        
+        <div class="text-center fs-2 mb-4">Add User</div>
+
+        <!-- เพิ่มส่วนนี้เพื่อแสดงข้อความเตือน (เช่น เบอร์โทรซ้ำ หรือ กรอกไม่ครบ) -->
+        @if (ViewBag.Status != null)
+        {
+            <div class="alert alert-danger py-2 mb-3 text-center" style="font-size: 14px; border-radius: 20px;">
+                @ViewBag.Status
+            </div>
+        }
+        <form asp-controller="Home" asp-action="AddUser">
+            
+            <!-- เพศ -->
+            <div class="d-flex gap-4 mb-3">
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="Gender" id="genderMale" value="Male" checked>
+                    <label class="form-check-label ms-1" for="genderMale" style="font-size: 15px;">ชาย</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="Gender" id="genderFemale" value="Female">
+                    <label class="form-check-label ms-1" for="genderFemale" style="font-size: 15px;">หญิง</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="Gender" id="genderOther" value="Other">
+                    <label class="form-check-label ms-1" for="genderOther" style="font-size: 15px;">อื่นๆ</label>
+                </div>
+            </div>
+
+            <!-- ชื่อ และ นามสกุล -->
+            <div class="row g-3 mb-3">
+                <div class="col-6">
+                    <label class="form-label mb-1" style="font-size: 14px;">ชื่อ</label>
+                    <input type="text" name="FirstName" class="form-control rounded-pill bg-light border-0 px-3 py-2"
+                           placeholder="firstname" required />
+                </div>
+                <div class="col-6">
+                    <label class="form-label mb-1" style="font-size: 14px;">นามสกุล</label>
+                    <input type="text" name="LastName" class="form-control rounded-pill bg-light border-0 px-3 py-2"
+                           placeholder="lastname" required />
+                </div>
+            </div>
+
+            <!-- เบอร์โทร และ วันเกิด -->
+            <div class="row g-3 mb-3">
+                <div class="col-6">
+                    <label class="form-label mb-1" style="font-size: 14px;">เบอร์โทร</label>
+                    <input type="tel" name="PhoneNumber" class="form-control rounded-pill bg-light border-0 px-3 py-2"
+                           placeholder="0xxxxxxxxx" maxlength="10" pattern="[0-9]{10}" inputmode="numeric"
+                           oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);" required />
+                </div>
+                <div class="col-6">
+                    <label class="form-label mb-1" style="font-size: 14px;">วันเกิด</label>
+                    <input type="date" name="BirthDate"
+                           class="form-control rounded-pill bg-light border-0 px-3 py-2 text-secondary" required />
+                </div>
+            </div>
+            <!-- รหัสผ่าน (บังคับกรอก ไม่มีค่าเริ่มต้น) -->
+            <div class="mb-3 text-start">
+                <label class="form-label mb-1" style="font-size: 14px;">รหัสผ่าน</label>
+                <input type="password" name="Password" class="form-control rounded-pill bg-light border-0 px-3 py-2"
+                       placeholder="กรุณากรอกรหัสผ่าน" required />
+            </div>
+            <!-- บทบาท (Role) -->
+            <div class="mb-4 text-start">
+                <label class="form-label mb-1" style="font-size: 14px;">บทบาท (Role)</label>
+                <select name="Role" class="form-select rounded-pill bg-light border-0 px-3 py-2 text-secondary"
+                        required>
+                    <option value="" disabled selected>-- เลือกบทบาท --</option>
+                    <option value="Customer">Customer</option>
+                    <option value="Chef">Chef</option>
+                    <option value="Cashier">Cashier</option>
+                    <option value="Rider">Rider</option>
+                    <option value="Manager">Manager</option>
+                </select>
+            </div>
+
+            <!-- ปุ่มบันทึก -->
+            <div class="text-center mt-4">
+                <button type="submit" class="btn btn-submit-custom rounded-pill fw-bold px-5 py-2"
+                        style="min-width: 200px;">
+                    เพิ่มผู้ใช้
+                </button>
+            </div>
+
+        </form>
+
+    </div>
+</div>

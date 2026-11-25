@@ -1,0 +1,96 @@
+@{
+    ViewData["Title"] = "adminLayout";
+    Layout = "AdminLayout"; // ปรับชื่อ Layout ตามโปรเจกต์ของคุณ
+}
+
+<table class="table table-bordered table-striped table-hover">
+    <thead>
+        <tr>
+            <th>head1</th>
+            <th>Head2</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>body1</td>
+            <td>body2</td>
+        </tr>
+        <tr>
+            <td>body3</td>
+            <td>body4</td>
+        </tr>
+        <tr>
+            <td>body5</td>
+            <td>body6</td>
+        </tr>
+    </tbody>
+    <tfoot>
+        <tr>
+            <th colspan="2">2 แถว</th>
+        </tr>
+    </tfoot>
+</table>
+<br>
+
+<div class="container">
+    <div class="card">
+        <h3 class="card-header">ส่วนหัว</h3>
+        <div class="card-body">
+            <h3 class="card-title"> ส่วน title</h3>
+            <p class="card-text"> text card</p>
+        </div>
+    </div>
+</div>
+<br>
+
+
+<div class="container">
+    <div class="row g-3">
+        <div class="col-12 col-md-4">
+            <div class="card h-100">
+                <h3 class="card-header">card header 2</h3>
+                <div class="card-body">
+                    <h3 class="card-title"> title card 3</h3>
+                    <p class="card-text">text card</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4">
+            <div class="card h-100">
+                <h3 class="card-header">card header 2</h3>
+                <div class="card-body">
+                    <h3 class="card-title"> title card 3</h3>
+                    <p class="card-text">text card</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4">
+            <div class="card h-100">
+                <h3 class="card-header">card header 2</h3>
+                <div class="card-body">
+                    <h3 class="card-title"> title card 3</h3>
+                    <p class="card-text">text card</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+<br>
+<div class="container">
+    <form asp-controller="Home" asp-action="Lab4">
+        <div class="mb-3">
+            <label class="form-label">Name</label>
+            <input type="text" class="form-conrtol">
+        </div>
+        <br>
+        <div class="row align-items-center mb-3">
+            <div class="col-auto">
+                <label class="col-form-label"> name</label>
+            </div>
+            <div class="col">
+                <input type="text" class="form-control">
+            </div>
+        </div>
+    </form>
+</div>

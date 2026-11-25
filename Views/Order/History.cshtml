@@ -1,0 +1,290 @@
+@model IEnumerable<surawat_67_172467_L003.Models.Order>
+@{
+    ViewData["Title"] = "ประวัติการสั่งอาหาร";
+    Layout = "_Layout";
+    var reviewedKeys = ViewBag.ReviewedKeys as HashSet<string> ?? new HashSet<string>();
+}
+
+<style>
+    .madimi-one-regular {
+        font-family: "Madimi One", sans-serif;
+    }
+
+    body {
+        background-color: #fffaf5;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140' viewBox='0 0 140 140'%3E%3Cg fill='none' stroke='%23ff6600' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round' opacity='0.11'%3E%3Cpath d='M18 36h32c0 11-7 18-16 18s-16-7-16-18z'/%3E%3Cpath d='M22 30l24-6M22 25l24-3'/%3E%3Cpath d='M96 22l18 28-28 6z'/%3E%3Ccircle cx='98' cy='38' r='2'/%3E%3Ccircle cx='104' cy='44' r='1.5'/%3E%3Cpath d='M30 88h16l-2 24H32z'/%3E%3Cpath d='M28 88h20M38 88l5-10'/%3E%3Cpath d='M92 84v28M89 84v9c0 3 6 3 6 0v-9M106 84v28'/%3E%3Cellipse cx='106' cy='89' rx='3.5' ry='5'/%3E%3Ccircle cx='68' cy='24' r='2'/%3E%3Ccircle cx='66' cy='70' r='2.5'/%3E%3C/g%3E%3C/svg%3E");
+        background-repeat: repeat;
+        color: #222222;
+    }
+
+    .history-card {
+        background-color: #ffffff;
+        border: 1px solid #ffe4d1;
+        border-top: 6px solid #ff6600;
+        border-radius: 28px;
+        box-shadow: 0 12px 32px rgba(255, 102, 0, 0.1);
+        color: #222222;
+        max-width: 840px;
+        margin: 50px auto 90px auto;
+        padding: 45px 50px;
+        min-height: 520px;
+    }
+
+    .history-title {
+        font-size: 32px;
+        font-weight: 800;
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .history-list-wrapper {
+        max-width: 660px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        max-height: 500px;
+        overflow-y: auto;
+        padding-right: 4px;
+    }
+
+    .order-history-item {
+        background-color: #fffaf5;
+        border: 1.5px solid #ffe0c7;
+        border-radius: 18px;
+        padding: 18px 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: all 0.2s ease;
+    }
+
+    .order-history-item:hover {
+        background-color: #ffffff;
+        border-color: #ff6600;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(255, 102, 0, 0.12);
+    }
+
+    .order-date {
+        font-size: 16px;
+        font-weight: bold;
+        color: #222222;
+    }
+
+    .order-sub-info {
+        font-size: 13px;
+        color: #666666;
+    }
+
+    .order-price {
+        font-size: 18px;
+        font-weight: bold;
+        color: #ff6600;
+    }
+
+    .btn-detail {
+        background-color: #ff6600;
+        color: #ffffff;
+        border: none;
+        border-radius: 50px;
+        padding: 7px 18px;
+        font-size: 13px;
+        font-weight: bold;
+        transition: 0.2s;
+    }
+
+    .btn-detail:hover {
+        background-color: #e05500;
+        color: #ffffff;
+    }
+
+    .btn-review-quick {
+        background-color: #ff9800;
+        color: #ffffff;
+        border: none;
+        border-radius: 50px;
+        padding: 6px 16px;
+        font-size: 13px;
+        font-weight: bold;
+        transition: 0.2s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .btn-review-quick:hover {
+        background-color: #e68900;
+        color: #ffffff;
+    }
+</style>
+
+<div class="history-card madimi-one-regular">
+    <div class="history-title">
+        <i class="bi bi-clock-history me-2" style="color: #ff6600;"></i>ประวัติการสั่งอาหาร
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success rounded-4 text-center py-2 mb-4" style="max-width: 660px; margin: 0 auto;">
+            <i class="bi bi-check-circle-fill me-1"></i> @TempData["Success"]
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-warning rounded-4 text-center py-2 mb-4" style="max-width: 660px; margin: 0 auto;">
+            <i class="bi bi-exclamation-triangle-fill me-1"></i> @TempData["Error"]
+        </div>
+    }
+
+    @if (Model != null && Model.Any())
+    {
+        <div class="history-list-wrapper">
+            @foreach (var order in Model)
+            {
+                var itemCount = order.OrderItems?.Sum(i => i.Quantity) ?? 0;
+                var statusText = order.Status switch
+                {
+                    "PENDING" => "รอดำเนินการ",
+                    "PREPARING" => "กำลังเตรียมอาหาร",
+                    "ON_DELIVERY" => "กำลังจัดส่ง",
+                    "COMPLETED" => "จัดส่งสำเร็จ",
+                    "CANCELLED" => "ยกเลิกแล้ว",
+                    _ => order.Status
+                };
+                var statusBadgeClass = order.Status switch
+                {
+                    "COMPLETED" => "bg-success",
+                    "CANCELLED" => "bg-danger",
+                    _ => "bg-warning text-dark"
+                };
+
+                <div class="order-history-item">
+                    <div>
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <span class="order-date"><i class="bi bi-calendar-event me-1" style="color: #ff6600;"></i>@(order.CreatedAt?.ToString("dd/MM/yyyy") ?? "-")</span>
+                            <span class="badge @statusBadgeClass rounded-pill" style="font-size: 11px;">@statusText</span>
+                        </div>
+                        <div class="order-sub-info">
+                            <span>@itemCount รายการ</span>
+                            <span class="mx-1">|</span>
+                            <span>@order.OrderNumber</span>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="text-end">
+                            <div class="order-price">@order.TotalAmount.ToString("N0") บาท</div>
+                        </div>
+
+                        <button type="button" class="btn btn-detail" data-bs-toggle="modal" data-bs-target="#orderDetailModal-@order.Id">
+                            รายละเอียด <i class="bi bi-chevron-right ms-1"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ================= หน้าต่างรายละเอียดออเดอร์และรีวิว ================= -->
+                <div class="modal fade" id="orderDetailModal-@order.Id" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content border-0 shadow" style="border-radius: 24px; background-color: #fffaf5;">
+                            <div class="modal-header border-0 pb-0 px-4 pt-4">
+                                <div>
+                                    <h5 class="modal-title fw-bold">
+                                        <i class="bi bi-receipt me-2" style="color: #ff6600;"></i>รายละเอียดคำสั่งซื้อ
+                                    </h5>
+                                    <small class="text-muted">@order.OrderNumber | @(order.CreatedAt?.ToString("dd/MM/yyyy HH:mm") ?? "-")</small>
+                                </div>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+
+                            <div class="modal-body px-4 py-3">
+                                <div class="bg-white rounded-4 p-3 mb-3 border" style="border-color: #ffe4d1 !important; font-size: 14px;">
+                                    <div class="mb-1">
+                                        <span class="fw-bold"><i class="bi bi-geo-alt-fill me-1" style="color: #ff6600;"></i> ที่อยู่จัดส่ง:</span>
+                                        <span>@(string.IsNullOrEmpty(order.DeliveryAddress) ? "-" : order.DeliveryAddress)</span>
+                                    </div>
+                                    @if (!string.IsNullOrEmpty(order.Notes))
+                                    {
+                                        <div class="text-muted mt-1" style="font-size: 13px;">
+                                            <span class="fw-bold">หมายเหตุ:</span> @order.Notes
+                                        </div>
+                                    }
+                                </div>
+
+                                <div class="fw-bold mb-2" style="font-size: 14px; color: #ff6600;">รายการอาหาร (กดให้คะแนนรีวิวแต่ละเมนูได้)</div>
+                                <div class="bg-white rounded-4 p-3 mb-3 border d-flex flex-column gap-2" style="border-color: #ffe4d1 !important;">
+                                    @if (order.OrderItems != null && order.OrderItems.Any())
+                                    {
+                                        @foreach (var item in order.OrderItems)
+                                        {
+                                            var reviewKey = $"{order.Id}_{item.FoodId}";
+                                            bool isReviewed = reviewedKeys.Contains(reviewKey);
+
+                                            <div class="d-flex justify-content-between align-items-center pb-2" style="border-bottom: 1px dashed #ffe0c7;">
+                                                <div>
+                                                    <div class="fw-bold" style="font-size: 14px;">@item.FoodName <span class="text-muted">x @item.Quantity</span></div>
+                                                    <div class="text-muted" style="font-size: 13px;">@item.Subtotal.ToString("N0") บาท</div>
+                                                </div>
+
+                                                <div>
+                                                    @if (isReviewed)
+                                                    {
+                                                        <span class="badge bg-success rounded-pill px-3 py-2">
+                                                            <i class="bi bi-check-lg me-1"></i> รีวิวแล้ว
+                                                        </span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <a asp-controller="Order"
+                                                           asp-action="Review"
+                                                           asp-route-orderId="@order.Id"
+                                                           asp-route-foodId="@item.FoodId"
+                                                           class="btn-review-quick">
+                                                            <i class="bi bi-star-fill me-1"></i> รีวิวอาหาร
+                                                        </a>
+                                                    }
+                                                </div>
+                                            </div>
+                                        }
+                                    }
+                                </div>
+
+                                <div class="bg-white rounded-4 p-3 border" style="border-color: #ffe4d1 !important; font-size: 14px;">
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <span class="text-muted">ยอดรวมค่าอาหาร</span>
+                                        <span>@order.Subtotal.ToString("N0") บาท</span>
+                                    </div>
+                                    @if (order.DiscountAmount > 0)
+                                    {
+                                        <div class="d-flex justify-content-between mb-1 text-danger">
+                                            <span>ส่วนลด</span>
+                                            <span>-@order.DiscountAmount.ToString("N0") บาท</span>
+                                        </div>
+                                    }
+                                    <div class="d-flex justify-content-between fw-bold fs-6 border-top pt-2 mt-2">
+                                        <span>ยอดชำระทั้งหมด</span>
+                                        <span style="color: #ff6600;">@order.TotalAmount.ToString("N0") บาท</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="modal-footer border-0 pt-0 px-4 pb-4">
+                                <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">ปิดหน้าต่าง</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <i class="bi bi-clock-history display-3" style="color: #ffcca8;"></i>
+            <h5 class="text-muted mt-3">ยังไม่มีประวัติการสั่งอาหาร</h5>
+            <a asp-controller="Menu" asp-action="Menu" class="btn text-white fw-bold rounded-pill px-5 py-2 mt-3" style="background-color: #ff6600;">
+                <i class="bi bi-grid-fill me-1"></i> ไปเลือกเมนูอาหาร
+            </a>
+        </div>
+    }
+</div>

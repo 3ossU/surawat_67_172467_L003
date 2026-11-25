@@ -1,0 +1,684 @@
+@model IEnumerable<surawat_67_172467_L003.Models.Ingredient>
+@{
+    ViewData["Title"] = "จัดการสต็อกวัตถุดิบ";
+    Layout = "AdminLayout";
+    int roleId = ViewBag.RoleId ?? 2;
+    bool isManagerOrAdmin = (roleId == 2 || roleId == 3);
+
+    var totalItems = Model?.Count() ?? 0;
+    var lowStockItems = Model?.Count(x => x.Quantity > 0 && x.Quantity <= x.MinStockAlert) ?? 0;
+    var outOfStockItems = Model?.Count(x => x.Quantity <= 0) ?? 0;
+}
+
+<style>
+    .madimi-one-regular {
+        font-family: "Madimi One", sans-serif;
+    }
+
+    body {
+        background-color: #fffaf5;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140' viewBox='0 0 140 140'%3E%3Cg fill='none' stroke='%23ff6600' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round' opacity='0.11'%3E%3Cpath d='M18 36h32c0 11-7 18-16 18s-16-7-16-18z'/%3E%3Cpath d='M22 30l24-6M22 25l24-3'/%3E%3Cpath d='M96 22l18 28-28 6z'/%3E%3Ccircle cx='98' cy='38' r='2'/%3E%3Ccircle cx='104' cy='44' r='1.5'/%3E%3Cpath d='M30 88h16l-2 24H32z'/%3E%3Cpath d='M28 88h20M38 88l5-10'/%3E%3Cpath d='M92 84v28M89 84v9c0 3 6 3 6 0v-9M106 84v28'/%3E%3Cellipse cx='106' cy='89' rx='3.5' ry='5'/%3E%3Ccircle cx='68' cy='24' r='2'/%3E%3Ccircle cx='66' cy='70' r='2.5'/%3E%3C/g%3E%3C/svg%3E");
+        background-repeat: repeat;
+        color: #222222;
+    }
+
+    .kpi-card {
+        background-color: #ffffff;
+        color: #222222;
+        border: 1px solid #ffe4d1;
+        border-left: 6px solid #ff6600;
+        border-radius: 20px;
+        padding: 20px 24px;
+        box-shadow: 0 8px 22px rgba(255, 102, 0, 0.08);
+    }
+
+    .kpi-icon-circle {
+        width: 52px;
+        height: 52px;
+        border-radius: 16px;
+        background-color: #fff0e3;
+        color: #ff6600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+    }
+
+    .search-container {
+        max-width: 440px;
+    }
+
+    .search-input {
+        background-color: #ffffff;
+        border: 1.5px solid #ffd5b8;
+        color: #222222;
+    }
+
+    .search-input:focus {
+        background-color: #ffffff;
+        border-color: #ff6600;
+        box-shadow: 0 0 0 0.2rem rgba(255, 102, 0, 0.15);
+    }
+
+    .btn-add-stock {
+        background: linear-gradient(135deg, #ff6600, #e64a00);
+        color: #ffffff;
+        font-weight: bold;
+        border-radius: 50px;
+        padding: 10px 24px;
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 6px 16px rgba(255, 102, 0, 0.3);
+        transition: 0.2s;
+    }
+
+    .btn-add-stock:hover {
+        background: linear-gradient(135deg, #e65c00, #cc3d00);
+        color: #ffffff;
+        transform: translateY(-2px);
+    }
+
+    .table-wrapper {
+        background-color: #ffffff;
+        border: 1px solid #ffe4d1;
+        border-radius: 20px;
+        box-shadow: 0 10px 28px rgba(255, 102, 0, 0.08);
+        overflow: hidden;
+    }
+
+    .custom-table thead th {
+        background-color: #ff6600;
+        color: #ffffff;
+        border: none;
+        padding: 14px 16px;
+        font-weight: bold;
+    }
+
+    .custom-table tbody tr:nth-of-type(odd) {
+        background-color: #ffffff;
+    }
+
+    .custom-table tbody tr:nth-of-type(even) {
+        background-color: #fff8f2;
+    }
+
+    .custom-table tbody tr:hover {
+        background-color: #ffefe3;
+    }
+
+    .custom-table td {
+        padding: 13px 16px;
+        border-bottom: 1px solid #ffefe3;
+        color: #222222;
+    }
+
+    .stock-thumb {
+        width: 54px;
+        height: 46px;
+        object-fit: cover;
+        border-radius: 10px;
+        border: 1px solid #ffd5b8;
+        background-color: #fff0e3;
+        color: #ff6600;
+        font-weight: bold;
+        font-size: 12px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .btn-action-sm {
+        border-radius: 50px;
+        padding: 5px 14px;
+        border: none;
+        font-size: 13px;
+        font-weight: bold;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        transition: 0.2s;
+    }
+
+    .btn-adjust {
+        background-color: #ff6600;
+        color: #ffffff;
+    }
+
+    .btn-adjust:hover {
+        background-color: #d95600;
+        color: #ffffff;
+    }
+
+    .btn-edit-item {
+        background-color: #fff0e3;
+        color: #ff6600;
+        border: 1px solid #ffd5b8;
+    }
+
+    .btn-edit-item:hover {
+        background-color: #ff6600;
+        color: #ffffff;
+    }
+
+    .stock-modal .modal-content {
+        background-color: #fffaf5;
+        border: 1px solid #ffe4d1;
+        border-top: 6px solid #ff6600;
+        border-radius: 24px;
+        padding: 28px 34px;
+        box-shadow: 0 14px 36px rgba(0, 0, 0, 0.2);
+        color: #222222;
+    }
+
+    .stock-label {
+        font-size: 14px;
+        font-weight: bold;
+        margin-bottom: 5px;
+        display: block;
+        color: #333333;
+    }
+
+    .stock-input {
+        background-color: #ffffff;
+        border: 1.5px solid #ffd5b8;
+        border-radius: 14px;
+        color: #222222;
+        padding: 9px 14px;
+        font-size: 14px;
+    }
+
+    .stock-input:focus {
+        background-color: #ffffff;
+        border-color: #ff6600;
+        box-shadow: 0 0 0 0.2rem rgba(255, 102, 0, 0.15);
+    }
+</style>
+
+<div class="d-flex justify-content-center align-items-center py-4 madimi-one-regular">
+    <div class="container" style="max-width: 1050px;">
+
+        <div class="mb-4">
+            <h3 class="fw-bold mb-0 text-dark">
+                <i class="bi bi-box-seam-fill me-2" style="color: #ff6600;"></i>จัดการสต็อกวัตถุดิบ
+            </h3>
+            <small class="text-muted">
+                @(isManagerOrAdmin
+                    ? "ตรวจสอบปริมาณวัตถุดิบคงเหลือ เบิกใช้ในครัว และเติมของเข้าคลัง"
+                    : "ตรวจสอบปริมาณวัตถุดิบคงเหลือ และบันทึกการเบิกใช้วัตถุดิบในครัว")
+            </small>
+        </div>
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success rounded-4 text-center py-2 mb-4">
+                <i class="bi bi-check-circle-fill me-1"></i> @TempData["Success"]
+            </div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger rounded-4 text-center py-2 mb-4">
+                <i class="bi bi-exclamation-triangle-fill me-1"></i> @TempData["Error"]
+            </div>
+        }
+
+        <!-- 1. การ์ดสรุปสถานะวัตถุดิบ -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <div class="kpi-card d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small fw-bold">รายการวัตถุดิบทั้งหมด</div>
+                        <div class="fs-3 fw-bold text-dark">@totalItems รายการ</div>
+                    </div>
+                    <div class="kpi-icon-circle">
+                        <i class="bi bi-box-seam"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="kpi-card d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small fw-bold">วัตถุดิบเหลือน้อย (ต้องสั่งเพิ่ม)</div>
+                        <div class="fs-3 fw-bold" style="color: #ff6600;">@lowStockItems รายการ</div>
+                    </div>
+                    <div class="kpi-icon-circle">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="kpi-card d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small fw-bold">วัตถุดิบหมดสต็อก</div>
+                        <div class="fs-3 fw-bold text-danger">@outOfStockItems รายการ</div>
+                    </div>
+                    <div class="kpi-icon-circle text-danger" style="background-color: #fdecea;">
+                        <i class="bi bi-x-octagon-fill"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. แถบค้นหา + ตัวกรองหมวดหมู่ + ปุ่มเพิ่มวัตถุดิบ -->
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+            <div class="d-flex align-items-center gap-2 flex-grow-1" style="max-width: 620px;">
+                <div class="search-container w-100 position-relative">
+                    <input type="text"
+                           id="liveSearchStock"
+                           class="form-control rounded-pill search-input px-4 py-2 pe-5"
+                           placeholder="ค้นหาชื่อวัตถุดิบ, ประเภท, สถานะ..."
+                           autocomplete="off" />
+                    <span class="position-absolute end-0 top-50 translate-middle-y me-3 pe-none" style="color: #ff6600;">
+                        <i class="bi bi-search fs-5"></i>
+                    </span>
+                </div>
+
+                <select id="categoryFilter" class="form-select rounded-pill search-input" style="max-width: 170px;">
+                    <option value="">ทุกประเภท</option>
+                    <option value="เนื้อสัตว์">เนื้อสัตว์</option>
+                    <option value="ผัก">ผัก</option>
+                    <option value="เครื่องปรุง">เครื่องปรุง</option>
+                    <option value="ของแห้ง">ของแห้ง</option>
+                    <option value="เครื่องดื่ม">เครื่องดื่ม</option>
+                </select>
+            </div>
+
+            @if (isManagerOrAdmin)
+            {
+                <button type="button" class="btn-add-stock" data-bs-toggle="modal" data-bs-target="#addStockModal">
+                    <i class="bi bi-plus-circle-fill fs-5"></i>
+                    <span>เพิ่มวัตถุดิบใหม่</span>
+                </button>
+            }
+        </div>
+
+        <!-- 3. ตารางสต็อกวัตถุดิบ -->
+        <div class="table-responsive table-wrapper">
+            <table class="table custom-table align-middle m-0">
+                <thead>
+                    <tr>
+                        <th style="width: 10%; text-align: center;">รูป</th>
+                        <th style="width: 24%;">ชื่อสินค้า / วัตถุดิบ</th>
+                        <th style="width: 14%; text-align: center;">ประเภทวัตถุดิบ</th>
+                        <th style="width: 15%; text-align: center;">จำนวนที่เหลือ</th>
+                        <th style="width: 14%; text-align: center;">สถานะ</th>
+                        <th style="width: 23%; text-align: center;">จัดการสต็อก</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        @foreach (var item in Model)
+                        {
+                            string statusText;
+                            string badgeClass;
+                            if (item.Quantity <= 0)
+                            {
+                                statusText = "หมดสต็อก";
+                                badgeClass = "bg-danger";
+                            }
+                            else if (item.Quantity <= item.MinStockAlert)
+                            {
+                                statusText = "น้อย (ใกล้หมด)";
+                                badgeClass = "bg-warning text-dark";
+                            }
+                            else
+                            {
+                                statusText = "เยอะ (ปกติ)";
+                                badgeClass = "bg-success";
+                            }
+
+                            <tr class="stock-row"
+                                data-category="@item.Category"
+                                data-search="@($"{item.Name} {item.Category} {statusText}".ToLower())">
+                                <td class="text-center">
+                                    @if (!string.IsNullOrEmpty(item.ImageUrl))
+                                    {
+                                        <img src="@item.ImageUrl" alt="@item.Name" class="stock-thumb" />
+                                    }
+                                    else
+                                    {
+                                        <div class="stock-thumb">@item.Category</div>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="fw-bold">@item.Name</div>
+                                    <small class="text-muted" style="font-size: 12px;">
+                                        แจ้งเตือนขั้นต่ำ: @item.MinStockAlert.ToString("0.##") @item.Unit
+                                        @if (item.UpdatedAt.HasValue)
+                                        {
+                                            <span> | อัปเดต @item.UpdatedAt.Value.ToString("dd/MM HH:mm")</span>
+                                        }
+                                    </small>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge rounded-pill px-3" style="background-color: #fff0e3; color: #ff6600; border: 1px solid #ffd5b8;">@item.Category</span>
+                                </td>
+                                <td class="text-center fw-bold fs-6">
+                                    @item.Quantity.ToString("0.##") <small class="text-muted fw-normal">@item.Unit</small>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge @badgeClass rounded-pill px-3 py-1">@statusText</span>
+                                </td>
+                                <td class="text-center">
+                                    <div class="d-inline-flex gap-2">
+                                        @if (isManagerOrAdmin)
+                                        {
+                                            <button type="button"
+                                                    class="btn-action-sm btn-adjust btn-open-adjust"
+                                                    data-id="@item.Id"
+                                                    data-name="@item.Name"
+                                                    data-qty="@item.Quantity"
+                                                    data-unit="@item.Unit">
+                                                <i class="bi bi-arrow-left-right"></i> เบิก / เติม
+                                            </button>
+
+                                            <button type="button"
+                                                    class="btn-action-sm btn-edit-item btn-open-edit"
+                                                    data-id="@item.Id"
+                                                    data-name="@item.Name"
+                                                    data-category="@item.Category"
+                                                    data-qty="@item.Quantity"
+                                                    data-unit="@item.Unit"
+                                                    data-min="@item.MinStockAlert"
+                                                    data-img="@item.ImageUrl">
+                                                <i class="bi bi-pencil-square"></i> แก้ไข
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <button type="button"
+                                                    class="btn-action-sm btn-adjust btn-open-adjust"
+                                                    data-id="@item.Id"
+                                                    data-name="@item.Name"
+                                                    data-qty="@item.Quantity"
+                                                    data-unit="@item.Unit"
+                                                    @(item.Quantity <= 0 ? "disabled style=opacity:0.5;cursor:not-allowed;" : "")>
+                                                <i class="bi bi-box-arrow-up-right"></i> เบิกวัตถุดิบ
+                                            </button>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+
+                    <tr id="noStockRow" style="@(Model != null && Model.Any() ? "display: none;" : "")">
+                        <td colspan="6" class="text-center text-muted py-4">
+                            ไม่พบรายการวัตถุดิบในระบบ
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- ===================================================================== -->
+<!-- หน้าต่างเบิกใช้ (Chef / Manager) และเติมสต็อก (Manager เท่านั้น) -->
+<!-- ===================================================================== -->
+<div class="modal fade stock-modal madimi-one-regular" id="adjustStockModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 460px;">
+        <div class="modal-content position-relative">
+            <button type="button" class="btn-close position-absolute top-0 end-0 m-3" data-bs-dismiss="modal"></button>
+
+            <h4 class="fw-bold mb-1" id="adjTitle">จัดการจำนวนวัตถุดิบ</h4>
+            <p class="text-muted small mb-3" id="adjCurrentInfo">คงเหลือปัจจุบัน: --</p>
+
+            <form asp-controller="Admin" asp-action="AdjustStock" method="post">
+                <input type="hidden" name="id" id="adjStockId" />
+
+                <div class="mb-3">
+                    <label class="stock-label">ประเภทรายการ</label>
+                    @if (isManagerOrAdmin)
+                    {
+                        <div class="d-flex gap-2">
+                            <input type="radio" class="btn-check" name="adjustType" id="typeUse" value="USE" checked>
+                            <label class="btn btn-outline-danger w-50 fw-bold rounded-pill" for="typeUse">
+                                <i class="bi bi-dash-circle me-1"></i> เบิกใช้ในครัว
+                            </label>
+
+                            <input type="radio" class="btn-check" name="adjustType" id="typeRestock" value="RESTOCK">
+                            <label class="btn btn-outline-success w-50 fw-bold rounded-pill" for="typeRestock">
+                                <i class="bi bi-plus-circle me-1"></i> เติมของเข้าสต็อก
+                            </label>
+                        </div>
+                    }
+                    else
+                    {
+                        <input type="hidden" name="adjustType" value="USE" />
+                        <div class="p-2 rounded-pill text-center fw-bold text-danger border border-danger bg-white">
+                            <i class="bi bi-dash-circle me-1"></i> เบิกใช้วัตถุดิบในครัว
+                        </div>
+                    }
+                </div>
+
+                <div class="mb-4">
+                    <label class="stock-label">จำนวน (<span id="adjUnitLabel">Kg</span>) <span class="text-danger">*</span></label>
+                    <input type="number" name="amount" class="form-control stock-input fs-5 text-center fw-bold"
+                           step="0.1" min="0.1" placeholder="0.0" required />
+                </div>
+
+                <div class="d-flex justify-content-end gap-2">
+                    <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">ยกเลิก</button>
+                    <button type="submit" class="btn btn-add-stock rounded-pill px-4">
+                        @(isManagerOrAdmin ? "บันทึกยอด" : "ยืนยันเบิกใช้")
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@if (isManagerOrAdmin)
+{
+    <!-- ===================================================================== -->
+    <!-- หน้าต่างเพิ่มวัตถุดิบใหม่ (เฉพาะ Manager / Admin) -->
+    <!-- ===================================================================== -->
+    <div class="modal fade stock-modal madimi-one-regular" id="addStockModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" style="max-width: 620px;">
+            <div class="modal-content position-relative">
+                <button type="button" class="btn-close position-absolute top-0 end-0 m-3" data-bs-dismiss="modal"></button>
+
+                <h4 class="fw-bold mb-4"><i class="bi bi-plus-circle-fill me-2" style="color: #ff6600;"></i>เพิ่มวัตถุดิบใหม่</h4>
+
+                <form asp-controller="Admin" asp-action="CreateStock" method="post" enctype="multipart/form-data">
+                    <div class="row g-3">
+                        <div class="col-md-7">
+                            <label class="stock-label">ชื่อวัตถุดิบ <span class="text-danger">*</span></label>
+                            <input type="text" name="name" class="form-control stock-input" placeholder="เช่น ผักกาดดอง, เนื้อหมู" required />
+                        </div>
+                        <div class="col-md-5">
+                            <label class="stock-label">ประเภทวัตถุดิบ <span class="text-danger">*</span></label>
+                            <select name="category" class="form-select stock-input" required>
+                                <option value="เนื้อสัตว์">เนื้อสัตว์</option>
+                                <option value="ผัก">ผัก</option>
+                                <option value="เครื่องปรุง">เครื่องปรุง</option>
+                                <option value="ของแห้ง">ของแห้ง</option>
+                                <option value="เครื่องดื่ม">เครื่องดื่ม</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="stock-label">จำนวนตั้งต้น <span class="text-danger">*</span></label>
+                            <input type="number" name="quantity" class="form-control stock-input" step="0.1" min="0" value="0" required />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="stock-label">หน่วยนับ <span class="text-danger">*</span></label>
+                            <select name="unit" class="form-select stock-input">
+                                <option value="Kg">กิโลกรัม</option>
+                                <option value="กรัม">กรัม</option>
+                                <option value="ลิตร">ลิตร</option>
+                                <option value="แพ็ค">แพ็ค</option>
+                                <option value="ฟอง">ฟอง</option>
+                                <option value="ขวด">ขวด</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="stock-label">แจ้งเตือนเมื่อเหลือน้อยกว่า</label>
+                            <input type="number" name="minStockAlert" class="form-control stock-input" step="0.1" min="0" value="5" required />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="stock-label">อัปโหลดรูปภาพ (ถ้ามี)</label>
+                            <input type="file" name="imageFile" class="form-control stock-input" accept="image/*" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="stock-label">หรือใส่ลิงก์รูปภาพ</label>
+                            <input type="text" name="imageUrl" class="form-control stock-input" placeholder="https://..." />
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+                        <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">ยกเลิก</button>
+                        <button type="submit" class="btn btn-add-stock rounded-pill px-4">บันทึกวัตถุดิบ</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- หน้าต่างแก้ไขและลบวัตถุดิบ (เฉพาะ Manager / Admin) -->
+    <!-- ===================================================================== -->
+    <div class="modal fade stock-modal madimi-one-regular" id="editStockModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" style="max-width: 620px;">
+            <div class="modal-content position-relative">
+                <button type="button" class="btn-close position-absolute top-0 end-0 m-3" data-bs-dismiss="modal"></button>
+
+                <h4 class="fw-bold mb-4"><i class="bi bi-pencil-square me-2" style="color: #ff6600;"></i>แก้ไขข้อมูลวัตถุดิบ</h4>
+
+                <form asp-controller="Admin" asp-action="EditStock" method="post" enctype="multipart/form-data">
+                    <input type="hidden" name="id" id="editStockId" />
+
+                    <div class="row g-3">
+                        <div class="col-md-7">
+                            <label class="stock-label">ชื่อวัตถุดิบ <span class="text-danger">*</span></label>
+                            <input type="text" name="name" id="editStockName" class="form-control stock-input" required />
+                        </div>
+                        <div class="col-md-5">
+                            <label class="stock-label">ประเภทวัตถุดิบ <span class="text-danger">*</span></label>
+                            <select name="category" id="editStockCat" class="form-select stock-input" required>
+                                <option value="เนื้อสัตว์">เนื้อสัตว์</option>
+                                <option value="ผัก">ผัก</option>
+                                <option value="เครื่องปรุง">เครื่องปรุง</option>
+                                <option value="ของแห้ง">ของแห้ง</option>
+                                <option value="เครื่องดื่ม">เครื่องดื่ม</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="stock-label">จำนวนคงเหลือ</label>
+                            <input type="number" name="quantity" id="editStockQty" class="form-control stock-input" step="0.1" min="0" required />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="stock-label">หน่วยนับ</label>
+                            <input type="text" name="unit" id="editStockUnit" class="form-control stock-input" required />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="stock-label">จุดแจ้งเตือนขั้นต่ำ</label>
+                            <input type="number" name="minStockAlert" id="editStockMin" class="form-control stock-input" step="0.1" min="0" required />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="stock-label">เปลี่ยนรูปภาพ (อัปโหลดใหม่)</label>
+                            <input type="file" name="imageFile" class="form-control stock-input" accept="image/*" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="stock-label">หรือแก้ไขลิงก์รูปภาพ</label>
+                            <input type="text" name="imageUrl" id="editStockImg" class="form-control stock-input" placeholder="https://..." />
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+                        <button type="button" class="btn btn-danger rounded-pill px-4" onclick="submitDeleteStock()">
+                            <i class="bi bi-trash-fill me-1"></i> ลบรายการนี้
+                        </button>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">ยกเลิก</button>
+                            <button type="submit" class="btn btn-add-stock rounded-pill px-4">บันทึกการแก้ไข</button>
+                        </div>
+                    </div>
+                </form>
+
+                <form id="deleteStockForm" asp-controller="Admin" asp-action="DeleteStock" method="post" class="d-none">
+                    <input type="hidden" name="id" id="deleteStockIdInput" />
+                </form>
+            </div>
+        </div>
+    </div>
+}
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const searchInput = document.getElementById('liveSearchStock');
+        const catFilter = document.getElementById('categoryFilter');
+        const stockRows = document.querySelectorAll('.stock-row');
+        const noStockRow = document.getElementById('noStockRow');
+
+        function filterStocks() {
+            const keyword = searchInput.value.trim().toLowerCase();
+            const selectedCat = catFilter.value;
+            let visibleCount = 0;
+
+            stockRows.forEach(row => {
+                const text = row.getAttribute('data-search') || '';
+                const rowCat = row.getAttribute('data-category') || '';
+                const matchKeyword = text.includes(keyword);
+                const matchCat = selectedCat === "" || rowCat === selectedCat;
+
+                if (matchKeyword && matchCat) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            if (noStockRow) {
+                noStockRow.style.display = visibleCount === 0 ? '' : 'none';
+            }
+        }
+
+        searchInput.addEventListener('input', filterStocks);
+        catFilter.addEventListener('change', filterStocks);
+
+        const adjModal = new bootstrap.Modal(document.getElementById('adjustStockModal'));
+        document.querySelectorAll('.btn-open-adjust').forEach(btn => {
+            btn.addEventListener('click', function () {
+                document.getElementById('adjStockId').value = this.getAttribute('data-id');
+                document.getElementById('adjTitle').innerText = this.getAttribute('data-name');
+                const unit = this.getAttribute('data-unit');
+                document.getElementById('adjUnitLabel').innerText = unit;
+                document.getElementById('adjCurrentInfo').innerText = `คงเหลือปัจจุบัน: ${this.getAttribute('data-qty')} ${unit}`;
+                adjModal.show();
+            });
+        });
+
+        const editModalEl = document.getElementById('editStockModal');
+        if (editModalEl) {
+            const editModal = new bootstrap.Modal(editModalEl);
+            document.querySelectorAll('.btn-open-edit').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const id = this.getAttribute('data-id');
+                    document.getElementById('editStockId').value = id;
+                    document.getElementById('deleteStockIdInput').value = id;
+                    document.getElementById('editStockName').value = this.getAttribute('data-name');
+                    document.getElementById('editStockCat').value = this.getAttribute('data-category');
+                    document.getElementById('editStockQty').value = this.getAttribute('data-qty');
+                    document.getElementById('editStockUnit').value = this.getAttribute('data-unit');
+                    document.getElementById('editStockMin').value = this.getAttribute('data-min');
+                    document.getElementById('editStockImg').value = this.getAttribute('data-img') || '';
+                    editModal.show();
+                });
+            });
+        }
+    });
+
+    function submitDeleteStock() {
+        if (confirm('ยืนยันที่จะลบรายการวัตถุดิบนี้ออกจากระบบหรือไม่?')) {
+            document.getElementById('deleteStockForm').submit();
+        }
+    }
+</script>

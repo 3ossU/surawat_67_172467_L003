@@ -1,0 +1,550 @@
+@model IEnumerable<surawat_67_172467_L003.Models.Food>
+@using surawat_67_172467_L003.Models
+@{
+    ViewData["Title"] = "Menu";
+    Layout = "_Layout";
+    var promotions = ViewBag.Promotions as List<Promotion> ?? new List<Promotion>();
+    bool isPromoCategory = ViewBag.IsPromoCategory == true;
+}
+
+<style>
+    .madimi-one-regular {
+        font-family: "Madimi One", sans-serif;
+    }
+
+    /* พื้นหลังสีขาวนวล พร้อมลายไอคอนอาหารเล็กๆ สีส้มจางๆ ไม่ให้ดูโล่ง */
+    body {
+        background-color: #fffaf5;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140' viewBox='0 0 140 140'%3E%3Cg fill='none' stroke='%23ff6600' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round' opacity='0.11'%3E%3C!-- ชามราเมน/ก๋วยเตี๋ยว --%3E%3Cpath d='M18 36h32c0 11-7 18-16 18s-16-7-16-18z'/%3E%3Cpath d='M22 30l24-6M22 25l24-3'/%3E%3C!-- พิซซ่า/ชิ้นอาหาร --%3E%3Cpath d='M96 22l18 28-28 6z'/%3E%3Ccircle cx='98' cy='38' r='2'/%3E%3Ccircle cx='104' cy='44' r='1.5'/%3E%3C!-- แก้วเครื่องดื่ม --%3E%3Cpath d='M30 88h16l-2 24H32z'/%3E%3Cpath d='M28 88h20M38 88l5-10'/%3E%3C!-- ช้อนและส้อม --%3E%3Cpath d='M92 84v28M89 84v9c0 3 6 3 6 0v-9M106 84v28'/%3E%3Cellipse cx='106' cy='89' rx='3.5' ry='5'/%3E%3C!-- จุดตกแต่งเล็กๆ --%3E%3Ccircle cx='68' cy='24' r='2'/%3E%3Ccircle cx='66' cy='70' r='2.5'/%3E%3Ccircle cx='122' cy='74' r='2'/%3E%3Ccircle cx='16' cy='68' r='1.8'/%3E%3C/g%3E%3C/svg%3E");
+        background-repeat: repeat;
+        color: #2b2b2b;
+    }
+
+    /* กรอบรูปปกขนาดใหญ่ */
+    .menu-cover {
+        position: relative;
+        width: 100%;
+        height: 360px;
+        background-image: linear-gradient(to right, rgba(20, 12, 5, 0.72), rgba(255, 102, 0, 0.25)),
+                          url('https://dynamic-media-cdn.tripadvisor.com/media/photo-o/1b/18/90/4e/caption.jpg');
+        background-size: cover;
+        background-position: center;
+        display: flex;
+        align-items: center;
+        border-bottom: 5px solid #ff6600;
+        box-shadow: 0 6px 20px rgba(255, 102, 0, 0.15);
+    }
+
+    .cover-content {
+        max-width: 1200px;
+        width: 100%;
+        margin: 0 auto;
+        padding: 0 28px;
+        color: #ffffff;
+    }
+
+    .cover-badge {
+        display: inline-block;
+        background-color: #ff6600;
+        color: #ffffff;
+        font-size: 13px;
+        font-weight: bold;
+        padding: 5px 16px;
+        border-radius: 50px;
+        margin-bottom: 12px;
+        letter-spacing: 1px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+    }
+
+    .cover-title {
+        font-size: 42px;
+        font-weight: 800;
+        line-height: 1.2;
+        text-shadow: 0 3px 12px rgba(0, 0, 0, 0.45);
+        margin-bottom: 8px;
+    }
+
+    .cover-subtitle {
+        font-size: 16px;
+        color: #f5f5f5;
+        max-width: 540px;
+        text-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+    }
+
+    /* แถบหมวดหมู่อาหารสีขาวตัดส้ม */
+    .category-bar {
+        background-color: #ffffff;
+        width: 100%;
+        padding: 16px 0;
+        box-shadow: 0 4px 16px rgba(255, 102, 0, 0.08);
+        border-bottom: 1px solid #ffe4d1;
+        position: sticky;
+        top: 0;
+        z-index: 90;
+    }
+
+    .category-container {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 1.2rem;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 16px;
+    }
+
+    .category-item {
+        color: #555555;
+        background-color: #fff6ef;
+        border: 1.5px solid #ffe0c7;
+        border-radius: 50px;
+        padding: 8px 22px;
+        text-decoration: none;
+        transition: all 0.22s ease;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+        font-weight: bold;
+    }
+
+    .category-item:hover {
+        color: #ff6600;
+        border-color: #ff6600;
+        background-color: #ffffff;
+        transform: translateY(-2px);
+    }
+
+    .category-item.active {
+        background-color: #ff6600;
+        color: #ffffff;
+        border-color: #ff6600;
+        box-shadow: 0 4px 12px rgba(255, 102, 0, 0.35);
+    }
+
+    .category-icon {
+        font-size: 17px;
+    }
+
+    /* หัวข้อหมวดหมู่ */
+    .section-heading {
+        color: #222222;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding-left: 14px;
+        border-left: 5px solid #ff6600;
+    }
+
+    /* การ์ดเมนูอาหารสีขาวขอบมน */
+    .food-card {
+        background-color: #ffffff;
+        border: 1px solid #ffe6d3;
+        border-radius: 20px;
+        overflow: hidden;
+        transition: all 0.25s ease-in-out;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
+    }
+
+    .food-card:hover {
+        box-shadow: 0 14px 28px rgba(255, 102, 0, 0.18);
+        border-color: #ff6600;
+        transform: translateY(-5px);
+    }
+
+    .food-img-container {
+        background: linear-gradient(135deg, #ffe8d6, #ffd2b3);
+        height: 220px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .food-img-container img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.35s ease;
+    }
+
+    .food-card:hover .food-img-container img {
+        transform: scale(1.06);
+    }
+
+    .promo-badge {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        background: linear-gradient(135deg, #ff6600, #e63900);
+        color: #ffffff;
+        font-size: 12px;
+        font-weight: bold;
+        padding: 5px 14px;
+        border-radius: 50px;
+        box-shadow: 0 3px 8px rgba(230, 57, 0, 0.35);
+        z-index: 2;
+    }
+
+    .price-tag {
+        color: #ff6600;
+        font-weight: 800;
+        font-size: 17px;
+    }
+
+    .btn-select {
+        background-color: #ff6600;
+        color: #ffffff;
+        border: none;
+        border-radius: 50px;
+        padding: 8px 22px;
+        font-size: 14px;
+        font-weight: bold;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: 0.2s;
+        box-shadow: 0 4px 10px rgba(255, 102, 0, 0.25);
+    }
+
+    .btn-select:hover {
+        background-color: #e05500;
+        color: #ffffff;
+        transform: scale(1.05);
+    }
+
+    .empty-state-box {
+        background-color: #ffffff;
+        border: 2px dashed #ffcca8;
+        border-radius: 20px;
+        color: #777777;
+    }
+
+    .menu-content-area {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding-top: 40px;
+        padding-bottom: 90px;
+    }
+</style>
+
+<div class="madimi-one-regular">
+    <!-- ภาพปกขอบชนขอบ -->
+    <div class="menu-cover">
+        <div class="cover-content">
+            <div class="cover-title">อิ่มอร่อยครบทุกมื้อ รสชาติถูกใจ</div>
+            <div class="cover-subtitle">
+                คัดสรรวัตถุดิบสดใหม่ ปรุงจานต่อจาน พร้อมโปรโมชั่นสุดคุ้มสำหรับทานที่ร้านและสั่งกลับบ้าน
+            </div>
+        </div>
+    </div>
+
+    <!-- แถบหมวดหมู่อาหาร (ดึงจากตาราง categories และจับคู่ไอคอนตามชื่อหมวดหมู่) -->
+    <div class="category-bar">
+        <div class="category-container">
+            <!-- ปุ่ม ทั้งหมด -->
+            <a asp-controller="Menu" asp-action="Menu"
+               class="category-item @(ViewBag.SelectedCategory == null ? "active" : "")">
+                <i class="bi bi-grid-fill category-icon"></i>
+                <span>ทั้งหมด</span>
+            </a>
+
+            <!-- วนลูปแสดงหมวดหมู่ที่มีในตาราง categories จริง -->
+            @if (ViewBag.Categories != null)
+            {
+                @foreach (var cat in ViewBag.Categories)
+                {
+                    string catName = cat.Name ?? "";
+                    string iconClass = "bi-award-fill"; // ไอคอนค่าเริ่มต้น
+
+                    if (catName.Contains("โปรโมชั่น"))
+                    {
+                        iconClass = "bi-tags-fill";
+                    }
+                    else if (catName.Contains("ดีลร้อน") || catName.Contains("เผ็ด"))
+                    {
+                        iconClass = "bi-fire";
+                    }
+                    else if (catName.Contains("จานเดียว") || catName.Contains("ข้าว") || catName.Contains("หลัก"))
+                    {
+                        iconClass = "bi-egg-fried";
+                    }
+                    else if (catName.Contains("ของหวาน") || catName.Contains("ขนม"))
+                    {
+                        iconClass = "bi-cake2-fill";
+                    }
+                    else if (catName.Contains("เครื่องดื่ม") || catName.Contains("น้ำ") || catName.Contains("กาแฟ"))
+                    {
+                        iconClass = "bi-cup-straw";
+                    }
+                    else if (catName.Contains("ทานเล่น") || catName.Contains("กินเล่น") || catName.Contains("ทอด"))
+                    {
+                        iconClass = "bi-cookie";
+                    }
+
+                    <a asp-controller="Menu" asp-action="Menu" asp-route-categoryId="@cat.Id"
+                       class="category-item @(ViewBag.SelectedCategory == cat.Id ? "active" : "")">
+                        <i class="bi @iconClass category-icon"></i>
+                        <span>@cat.Name</span>
+                    </a>
+                }
+            }
+        </div>
+    </div>
+
+    <div class="menu-content-area px-4">
+        <!-- ================= ส่วนแสดงโปรโมชั่น ================= -->
+        @if (ViewBag.SelectedCategory == null || isPromoCategory)
+        {
+            if (promotions.Any())
+            {
+                <div class="@(ViewBag.SelectedCategory == null ? "mb-5" : "")">
+                    <h4 class="section-heading mb-4">
+                        <i class="bi bi-tags-fill text-warning"></i> โปรโมชั่นสุดคุ้ม
+                    </h4>
+
+                    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                        @foreach (var promo in promotions)
+                        {
+                            var imgUrl = !string.IsNullOrEmpty(promo.ImageUrl)
+                                ? promo.ImageUrl
+                                : promo.PromotionItems.FirstOrDefault()?.Food?.ImageUrl;
+
+                            var primaryFoodId = promo.PromotionItems.FirstOrDefault()?.FoodId ?? 1;
+                            var itemsSummary = string.Join(" + ", promo.PromotionItems.Select(pi => $"{pi.Food?.Name} x{pi.Quantity}"));
+
+                            <div class="col">
+                                <div class="card food-card h-100">
+                                    <div class="food-img-container">
+                                        <span class="promo-badge">ลด @promo.DiscountAmount.ToString("N0") ฿</span>
+                                        @if (!string.IsNullOrEmpty(imgUrl))
+                                        {
+                                            <img src="@imgUrl" alt="@promo.Name" />
+                                        }
+                                        else
+                                        {
+                                            <div class="text-center" style="color: #ff6600;">
+                                                <i class="bi bi-gift-fill fs-1 d-block"></i>
+                                                <span class="fw-bold">Promotion Set</span>
+                                            </div>
+                                        }
+                                    </div>
+                                    <div class="card-body d-flex justify-content-between align-items-center px-3 py-3">
+                                        <div class="pe-2">
+                                            <span class="fw-bold d-block text-dark" style="font-size: 16px;">@promo.Name</span>
+                                            <small class="text-muted d-block" style="font-size: 12px;">@itemsSummary</small>
+                                            <div class="mt-1">
+                                                <small class="text-decoration-line-through text-muted me-1">฿@promo.OriginalPrice.ToString("N0")</small>
+                                                <span class="price-tag">฿@promo.SpecialPrice.ToString("N0")</span>
+                                            </div>
+                                        </div>
+                                        <button type="button"
+                                                class="btn btn-select btn-add-cart flex-shrink-0"
+                                                data-id="@primaryFoodId"
+                                                data-name="[โปรโมชั่น] @promo.Name"
+                                                data-price="@promo.SpecialPrice">
+                                            <i class="bi bi-cart-plus-fill"></i> เลือก
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                if (ViewBag.SelectedCategory == null)
+                {
+                    <hr class="my-5" style="border-color: #ffcca8; opacity: 0.8;" />
+                }
+            }
+            else if (isPromoCategory)
+            {
+                <div class="empty-state-box text-center py-5">
+                    <i class="bi bi-tags fs-1 text-warning d-block mb-2"></i>
+                    <h5 class="mb-0">ยังไม่มีรายการโปรโมชั่นในขณะนี้</h5>
+                </div>
+            }
+        }
+
+        <!-- ================= ส่วนแสดงรายการอาหารปกติ ================= -->
+        @if (!isPromoCategory)
+        {
+            <h4 class="section-heading mb-4">
+                <i class="bi bi-egg-fried" style="color: #ff6600;"></i> รายการอาหาร
+            </h4>
+
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                @if (Model != null && Model.Any())
+                {
+                    @foreach (var item in Model)
+                    {
+                        <div class="col">
+                            <div class="card food-card h-100">
+                                <div class="food-img-container">
+                                    @if (!string.IsNullOrEmpty(item.ImageUrl))
+                                    {
+                                        <img src="@item.ImageUrl" alt="@item.Name" />
+                                    }
+                                    else
+                                    {
+                                        <div class="text-center" style="color: #ff6600;">
+                                            <i class="bi bi-cup-hot-fill fs-1 d-block"></i>
+                                            <span class="fw-bold small">@item.Name</span>
+                                        </div>
+                                    }
+                                </div>
+                                <div class="card-body d-flex justify-content-between align-items-center px-3 py-3">
+                                    <div class="pe-2">
+                                        <span class="fw-bold d-block text-dark" style="font-size: 16px;">@item.Name</span>
+                                        @if (!string.IsNullOrEmpty(item.Description))
+                                        {
+                                            <small class="text-muted d-block text-truncate" style="max-width: 210px; font-size: 12px;">@item.Description</small>
+                                        }
+                                        <span class="price-tag mt-1 d-inline-block">฿@item.Price.ToString("N0")</span>
+                                    </div>
+                                    <button type="button" class="btn btn-select btn-add-cart flex-shrink-0" data-id="@item.Id"
+                                            data-name="@item.Name" data-price="@item.Price">
+                                        <i class="bi bi-plus-lg"></i> เลือก
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="col-12">
+                        <div class="empty-state-box text-center py-5">
+                            <i class="bi bi-search fs-1 text-warning d-block mb-2"></i>
+                            <h5 class="mb-0">ยังไม่มีรายการอาหารในหมวดหมู่นี้</h5>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>
+<!-- ===================================================================== -->
+<!-- ปุ่มตะกร้าลอยตัวมุมขวาล่าง (Floating Cart Button + Badge) -->
+<!-- ===================================================================== -->
+<style>
+    .floating-cart-btn {
+        position: fixed;
+        bottom: 28px;
+        right: 28px;
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #ff6600, #e64a00);
+        color: #ffffff;
+        border: 3px solid #ffffff;
+        box-shadow: 0 8px 24px rgba(255, 102, 0, 0.45);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 26px;
+        cursor: pointer;
+        z-index: 1040;
+        transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .floating-cart-btn:hover {
+        transform: scale(1.1) translateY(-3px);
+        box-shadow: 0 12px 28px rgba(255, 102, 0, 0.6);
+        color: #ffffff;
+    }
+
+    .floating-cart-btn:active {
+        transform: scale(0.95);
+    }
+
+    .floating-cart-badge {
+        position: absolute;
+        top: -4px;
+        right: -4px;
+        background-color: #dc3545;
+        color: #ffffff;
+        font-size: 13px;
+        font-weight: 800;
+        min-width: 26px;
+        height: 26px;
+        padding: 0 6px;
+        border-radius: 50px;
+        border: 2px solid #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+    }
+
+    /* เอฟเฟกต์เด้งเบาๆ เวลากดเพิ่มอาหารลงตะกร้า */
+    @@keyframes cartBounce {
+        0%, 100% { transform: scale(1); }
+        40% { transform: scale(1.22); }
+        70% { transform: scale(0.92); }
+    }
+
+    .cart-bounce {
+        animation: cartBounce 0.4s ease;
+    }
+</style>
+
+<button type="button"
+        id="floatingCartBtn"
+        class="floating-cart-btn"
+        data-bs-toggle="offcanvas"
+        data-bs-target="#cartSidebar"
+        aria-label="เปิดตะกร้าสินค้า"
+        title="ดูรายการในตะกร้า">
+    <i class="bi bi-cart-fill"></i>
+    <span id="floatingCartBadge" class="floating-cart-badge" style="display: none;">0</span>
+</button>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // ฟังก์ชันอัปเดตตัวเลขบนปุ่มตะกร้าขวาล่าง
+        function syncFloatingCartBadge() {
+            const badge = document.getElementById('floatingCartBadge');
+            if (!badge) return;
+
+            const currentCart = JSON.parse(localStorage.getItem('restaurant_cart')) || [];
+            const totalItems = currentCart.reduce((sum, item) => sum + (item.quantity || 0), 0);
+
+            if (totalItems > 0) {
+                badge.innerText = totalItems > 99 ? '99+' : totalItems;
+                badge.style.display = 'flex';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+
+        // อัปเดตตัวเลขทันทีที่เปิดหน้า Menu
+        syncFloatingCartBadge();
+
+        // อัปเดตตัวเลขและทำเอฟเฟกต์เด้งทุกครั้งที่กดปุ่ม "เลือก" อาหาร
+        document.querySelectorAll('.btn-add-cart').forEach(btn => {
+            btn.addEventListener('click', function () {
+                setTimeout(() => {
+                    syncFloatingCartBadge();
+                    const floatBtn = document.getElementById('floatingCartBtn');
+                    if (floatBtn) {
+                        floatBtn.classList.remove('cart-bounce');
+                        void floatBtn.offsetWidth; // รีเซ็ต Animation
+                        floatBtn.classList.add('cart-bounce');
+                    }
+                }, 50);
+            });
+        });
+
+        // อัปเดตตัวเลขด้วยเมื่อมีการกด + หรือ - ใน Sidebar ตะกร้า
+        const cartContainer = document.getElementById('cartItemsContainer');
+        if (cartContainer) {
+            cartContainer.addEventListener('click', function () {
+                setTimeout(syncFloatingCartBadge, 50);
+            });
+        }
+    });
+</script>
